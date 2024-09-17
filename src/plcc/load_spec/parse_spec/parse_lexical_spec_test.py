@@ -25,16 +25,16 @@ def test_one_skip_token_matched():
     assert lexical_spec.ruleList == [LexicalRule(Line('skip WHITESPACE \',\'', 5, None), True, 'WHITESPACE', ',')]
 
 def test_one_token_matches():
-    lexical_spec = parse_lexical_spec([Line('token MINUS \'\-\'', 8, None)])
-    assert lexical_spec.ruleList == [LexicalRule(Line('token MINUS \'\-\'', 8, None), False, 'MINUS', '\-')]
+    lexical_spec = parse_lexical_spec([Line('token MINUS \'\\-\'', 8, None)])
+    assert lexical_spec.ruleList == [LexicalRule(Line('token MINUS \'\\-\'', 8, None), False, 'MINUS', '\\-')]
 
 def test_one_token_no_token_at_start():
-    lexical_spec = parse_lexical_spec([Line('MINUS \'\-\'', 8, None)])
-    assert lexical_spec.ruleList == [LexicalRule(Line('MINUS \'\-\'', 8, None), False, 'MINUS', '\-')]
+    lexical_spec = parse_lexical_spec([Line('MINUS \'\\-\'', 8, None)])
+    assert lexical_spec.ruleList == [LexicalRule(Line('MINUS \'\\-\'', 8, None), False, 'MINUS', '\\-')]
 
 def test_tokens_captured_with_trailing_comment():
-    lexical_spec = parse_lexical_spec([Line('MINUS \'\-\'  #This is a test', 8, None), Line('token COMMA \',\' #This is also a test', 9, None)])
-    assert lexical_spec.ruleList == [LexicalRule(Line('MINUS \'\-\'  #This is a test', 8, None), False, 'MINUS', '\-'), LexicalRule(Line('token COMMA \',\' #This is also a test', 9, None), False, 'COMMA', ',')]
+    lexical_spec = parse_lexical_spec([Line('MINUS \'\\-\'  #This is a test', 8, None), Line('token COMMA \',\' #This is also a test', 9, None)])
+    assert lexical_spec.ruleList == [LexicalRule(Line('MINUS \'\\-\'  #This is a test', 8, None), False, 'MINUS', '\\-'), LexicalRule(Line('token COMMA \',\' #This is also a test', 9, None), False, 'COMMA', ',')]
 
 def test_incorrect_format_raises_error():
     with raises(AttributeError):
@@ -43,4 +43,3 @@ def test_incorrect_format_raises_error():
     #Getting an 'escape' warning when using "\'\-\'" (Example line 1 in README)??
     #Should I remove the escape characters in the quotes or leave them?
     #The tests are adding an extra "\" on to the string
-    #Need to throw errors in case of anything obviously wrong, maybe use a "try        except"??
