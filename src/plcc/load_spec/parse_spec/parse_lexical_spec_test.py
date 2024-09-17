@@ -5,14 +5,14 @@ from ..load_rough_spec.parse_lines import Line
 
 
 def test_empty_yields_nothing():
-    lexical_spec = parse_lexical_spec([]) #Should this return error or nothing?
+    lexical_spec = parse_lexical_spec([])
     assert lexical_spec.ruleList == []
 
 def test_None_yields_nothing():
     lexical_spec = parse_lexical_spec(None)
     assert lexical_spec.ruleList == []
 
-def test_blank_lines_skipped():          #Am I going to be handed the % or no????
+def test_blank_lines_skipped():
     lexical_spec = parse_lexical_spec([Line('', 1, None)])
     assert lexical_spec.ruleList == []
 
@@ -40,6 +40,3 @@ def test_incorrect_format_raises_error():
     with raises(AttributeError):
         lexical_spec = parse_lexical_spec([Line('skip #This one sucks', 12, None)])
 
-    #Getting an 'escape' warning when using "\'\-\'" (Example line 1 in README)??
-    #Should I remove the escape characters in the quotes or leave them?
-    #The tests are adding an extra "\" on to the string
