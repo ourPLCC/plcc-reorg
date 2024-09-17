@@ -26,7 +26,6 @@ def parse_lexical_spec(lines):
     otherToken = re.compile(r'^(?P<Name>\S+)\s+(?P<Pattern>((\'\S+\')|(\"\S+\")))\s*$')
     for line in lines:
         l = line.string.strip()
-
         l = l.split("#")[0]
 
         #Skips Comment only lines completely
@@ -59,5 +58,7 @@ def parse_lexical_spec(lines):
             newTokenRule = LexicalRule(line=line, isSkip=False, name=otherTokenMatch['Name'], pattern=patternRule)
             lexical_spec.ruleList.append(newTokenRule)
             continue
+
+        raise AttributeError("Line is not in correct format!!!")
 
     return lexical_spec
