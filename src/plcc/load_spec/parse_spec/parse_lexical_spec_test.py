@@ -36,7 +36,6 @@ def test_tokens_captured_with_trailing_comment():
     lexical_spec = parse_lexical_spec([Line('MINUS \'\\-\'  #This is a test', 8, None), Line('token COMMA \',\' #This is also a test', 9, None)])
     assert lexical_spec.ruleList == [LexicalRule(Line('MINUS \'\\-\'  #This is a test', 8, None), False, 'MINUS', '\\-'), LexicalRule(Line('token COMMA \',\' #This is also a test', 9, None), False, 'COMMA', ',')]
 
-def test_incorrect_format_raises_error():
-    with raises(AttributeError):
-        lexical_spec = parse_lexical_spec([Line('skip #This one sucks', 12, None)])
-
+def test_incorrect_format_is_added_as_a_Line():
+    lexical_spec = parse_lexical_spec([Line('This line is complete gibberish please ignore', 12, None)])
+    assert lexical_spec.ruleList == [Line('This line is complete gibberish please ignore', 12, None)]
