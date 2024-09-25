@@ -39,3 +39,15 @@ def test_tokens_captured_with_trailing_comment():
 def test_incorrect_format_is_added_as_a_Line():
     lexical_spec = parse_lexical_spec([Line('This line is complete gibberish please ignore', 12, None)])
     assert lexical_spec.ruleList == [Line('This line is complete gibberish please ignore', 12, None)]
+
+def test_parser_differentiates_between_Line_and_LexicalRule():
+    lexical_spec = parse_lexical_spec([Line('This line is even more gibberish', 24, None), Line('token LPAREN \'(\'', 23, None)])
+    assert lexical_spec.ruleList == [Line('This line is even more gibberish', 24, None), LexicalRule(Line('token LPAREN \'(\'', 23, None), False, 'LPAREN', '(')]
+
+def test_comments_count_as_token_rule():
+    lexical_spec = parse_lexical_spec([Line('skip COMMENT \'#\'', 2, None)])
+    assert lexical_spec.ruleList == [LexicalRule(Line('skip COMMENT \'#\'', 2, None), True, 'COMMENT', '#')]
+
+def test_comments_at_end_ignored_and_no_comment_is_wrong():
+    lexical_spec = parse_lexical_spec([Line('skip COMMENT \'%\' #Ironic isn\'t it?', 3, None), Line('skip COMMENT \'#\' I forgot the comment', 4, None)])
+    assert lexical_spec.ruleList == [LexicalRule(Line('skip COMMENT \'%\' #Ironic isn\'t it?', 3, None), True, 'COMMENT', '%'), Line('skip COMMENT \'#\' I forgot the comment', 4, None)]
