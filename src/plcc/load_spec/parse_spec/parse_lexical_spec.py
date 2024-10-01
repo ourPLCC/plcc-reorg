@@ -14,54 +14,72 @@ class LexicalRule:
 class LexicalSpec:
     ruleList: [LexicalRule|Line]
 
-def parse_lexical_spec(lines):
+def parse_lexical_spec(lines: list[Line]) -> LexicalSpec:
     lexical_spec = LexicalSpec([])
-    if lines == []:
-        return lexical_spec
-    if lines is None:
+    
+    if not lines:
         return lexical_spec
 
-    skipToken = re.compile(r'^skip\s+(?P<Name>\S+)\s+(?P<Pattern>((\'\S+\')|(\"\S+\")))\s*(?:#.*)*$')
-    tokenToken = re.compile(r'^token\s+(?P<Name>\S+)\s+(?P<Pattern>((\'\S+\')|(\"\S+\")))\s*(?:#.*)*$')
-    otherToken = re.compile(r'^(?P<Name>\S+)\s+(?P<Pattern>((\'\S+\')|(\"\S+\")))\s*(?:#.*)*$')
+    patterns = compilePatterns()
     for line in lines:
         l = line.string.strip()
-
-        #Skip blank or empty Lines
-        if l == '':
-            continue
-        if re.match(r'^\s*#.*$', l):
+        blankOrComment = isBlankOrComment(l)
+        if blankOrComment:
             continue
 
-
-        skipMatches = re.match(skipToken, l)
-        if skipMatches:
-            newSkipRule = skipTokenGenerator(line, skipMatches['Name'], skipMatches['Pattern'])
-            lexical_spec.ruleList.append(newSkipRule)
+        if skipTokenGenerates(l, line, patterns["skipToken"], lexical_spec):
             continue
-
-        tokenMatches = re.match(tokenToken, l)
-        if tokenMatches:
-            newTokenRule = tokenGenerator(line, tokenMatches['Name'], tokenMatches['Pattern'])
-            lexical_spec.ruleList.append(newTokenRule)
+        elif regularTokenGenerates(l, line, patterns["tokenToken"], lexical_spec):
             continue
-
-        otherTokenMatches = re.match(otherToken, l)
-        if otherTokenMatches:
-            newTokenRule = tokenGenerator(line, otherTokenMatches['Name'], otherTokenMatches['Pattern'])
-            lexical_spec.ruleList.append(newTokenRule)
-            continue
-
-        lexical_spec.ruleList.append(line)
+        else:
+            lexical_spec.ruleList.append(line)
 
     return lexical_spec
 
-def skipTokenGenerator(line, name, pattern):
-    pattern = pattern.strip('\'')
-    pattern = pattern.strip('\"')
-    return LexicalRule(line=line, isSkip=True, name=name, pattern=pattern)
 
-def tokenGenerator(line, name, pattern):
+
+def compilePatterns() -> dict:
+    return {
+        'skipToken' : re.compile(r'^skip\s+(?P<Name>\S+)\s+(?P<Pattern>((\'\S+\')|(\"\S+\")))\s*(?:#.*)*$'),
+        'tokenToken' : re.compile(r'(?:^token\s+)?(?P<Name>\S+)\s+(?P<Pattern>((\'\S+\')|(\"\S+\")))\s*(?:#.*)*$')
+    }
+
+def isBlankOrComment(line: str) -> bool:
+    if line == '':
+        return True
+    elif line.startswith('#'):
+        return True
+    else:
+        return False
+
+def stripQuotes(pattern: str) -> str:
     pattern = pattern.strip('\'')
     pattern = pattern.strip('\"')
-    return LexicalRule(line=line, isSkip=False, name=name, pattern=pattern)
+    return pattern
+
+def skipMatches(line, skipPattern):
+    if re.match(skipPattern, line):
+        return True
+    else:
+        return False
+
+def skipTokenGenerates(line_str, line, skipPattern, lexical_spec):
+    skipMatches = re.match(skipPattern, line_str)
+    if skipMatches:
+        pattern = stripQuotes(skipMatches['Pattern'])
+        newSkipRule = LexicalRule(line=line, isSkip=True, name=skipMatches['Name'], pattern=pattern)
+        lexical_spec.ruleList.append(newSkipRule)
+        return True
+    else:
+        return False
+
+def regularTokenGenerates(line_str, line, tokenPattern, lexical_spec):
+    tokenMatches = re.match(tokenPattern, line_str)
+
+    if tokenMatches:
+        pattern = stripQuotes(tokenMatches['Pattern'])
+        newTokenRule = LexicalRule(line=line, isSkip=False, name=tokenMatches['Name'], pattern=pattern)
+        lexical_spec.ruleList.append(newTokenRule)
+        return True
+    else:
+        return False
