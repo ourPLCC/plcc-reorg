@@ -21,7 +21,7 @@ def test_comment_only_lines_skipped():
     assert lexical_spec.ruleList == []
 
 def test_one_skip_token_matched():
-    lexical_spec = parse_lexical_spec([Line('skip WHITESPACE \',\'', 5, None)])               #is whitespace in the quotations fine?
+    lexical_spec = parse_lexical_spec([Line('skip WHITESPACE \',\'', 5, None)])
     assert lexical_spec.ruleList == [LexicalRule(Line('skip WHITESPACE \',\'', 5, None), True, 'WHITESPACE', ',')]
 
 def test_one_token_matches():
@@ -51,3 +51,7 @@ def test_comments_count_as_token_rule():
 def test_comments_at_end_ignored_and_no_comment_is_wrong():
     lexical_spec = parse_lexical_spec([Line('skip COMMENT \'%\' #Ironic isn\'t it?', 3, None), Line('skip COMMENT \'#\' I forgot the comment', 4, None)])
     assert lexical_spec.ruleList == [LexicalRule(Line('skip COMMENT \'%\' #Ironic isn\'t it?', 3, None), True, 'COMMENT', '%'), Line('skip COMMENT \'#\' I forgot the comment', 4, None)]
+
+def test_token_must_begin_with_no_whitespace():
+    lexical_spec = parse_lexical_spec([Line('  skip WHITESPACE \',\' ', 1, None)])
+    assert lexical_spec.ruleList == [Line('  skip WHITESPACE \',\' ', 1, None)]
