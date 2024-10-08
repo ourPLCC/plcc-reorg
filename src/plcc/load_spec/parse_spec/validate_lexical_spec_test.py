@@ -6,15 +6,103 @@ from .validate_lexical_spec import ValidationError, validate_lexical_spec
 from .parse_lexical_spec import LexicalRule, LexicalSpec
 
 def test_empty_no_errors():
-    lexicalSpec = makeLexicalSpec()
+    lexicalSpec = makeLexicalSpec([])
     errors = validate_lexical_spec(lexicalSpec)
     assert len(errors) == 0
 
-def test_invalid_name_format_error():
-    invalidName = makeLexicalRule(makeLine("invalid-name"), False, "invalid-name", "")
+def test_None_no_errors():
+    lexicalSpec = makeLexicalSpec(None)
+    errors = validate_lexical_spec(lexicalSpec)
+    assert len(errors) == 0
+
+def test_lowercase_name_format_error():
+    invalidName = makeLexicalRule(makeLine("invalid_name"), False, "invalid_name", "")
     lexicalSpec = makeLexicalSpec([invalidName])
     errors = validate_lexical_spec(lexicalSpec)
+    assert len(errors) == 1
     assert errors[0] == makeInvalidNameFormatError(invalidName)
+
+def test_whitespace_name_format_error():
+    whitespaceName = makeLexicalRule(makeLine("NAME ERROR"), False, "NAME ERROR", "\\s+")
+    lexicalSpec = makeLexicalSpec([whitespaceName])
+    errors = validate_lexical_spec(lexicalSpec)
+    assert len(errors) == 1
+    assert errors[0] == makeInvalidNameFormatError(whitespaceName)
+
+def test_empty_name_format_error():
+    emptyName = makeLexicalRule(makeLine(""), False, "", "")
+    lexicalSpec = makeLexicalSpec([emptyName])
+    errors = validate_lexical_spec(lexicalSpec)
+    assert len(errors) == 1
+    assert errors[0] == makeInvalidNameFormatError(emptyName)
+
+def test_invalid_character_format_error():
+    invalidName = makeLexicalRule(makeLine("TE$T"), True, "TE$T", "")
+    lexicalSpec = makeLexicalSpec([invalidName])
+    errors = validate_lexical_spec(lexicalSpec)
+    assert len(errors) == 1
+    assert errors[0] == makeInvalidNameFormatError(invalidName)
+
+def test_name_start_with_number_format_error():
+    numberName = makeLexicalRule(makeLine("1WHITESPACE"), True, "1WHITESPACE", "")
+    lexicalSpec = makeLexicalSpec([numberName])
+    errors = validate_lexical_spec(lexicalSpec)
+    assert len(errors) == 1
+    assert errors[0] == makeInvalidNameFormatError(numberName)
+
+def test_valid_name_no_error():
+    validName = makeLexicalRule(makeLine("TEST"), False, "TEST", "")
+    lexicalSpec = makeLexicalSpec([validName])
+    errors = validate_lexical_spec(lexicalSpec)
+    assert len(errors) == 0
+
+def test_skip_rule_no_error():
+    skipRule = makeLexicalRule(makeLine("WHITESPACE"), True, "WHITESPACE", "\\s+")
+    lexicalSpec = makeLexicalSpec([skipRule])
+    errors = validate_lexical_spec(lexicalSpec)
+    assert len(errors) == 0
+
+def test_duplicate_names_duplicate_error():
+    validName = makeLexicalRule(makeLine("VALID"), False, "VALID", "-")
+    duplicateName = makeLexicalRule(makeLine("VALID"), False, "VALID", "+")
+    lexicalSpec = makeLexicalSpec([validName, duplicateName])
+    errors = validate_lexical_spec(lexicalSpec)
+    assert len(errors) == 1
+    assert errors[0] == makeDuplicateNameError(duplicateName)
+
+def test_unique_names_no_error():
+    validName = makeLexicalRule(makeLine("VALID"), False, "VALID", "-")
+    secondValidName = makeLexicalRule(makeLine("VALID_2"), False, "VALID_2", "-")
+    lexicalSpec = makeLexicalSpec([validName, secondValidName])
+    errors = validate_lexical_spec(lexicalSpec)
+    assert len(errors) == 0
+
+def test_line_invalid_rule_error():
+    line = makeLine("gibberish with no pattern or token")
+    lexicalSpec = makeLexicalSpec([line])
+    errors = validate_lexical_spec(lexicalSpec)
+    assert len(errors) == 1
+    assert errors[0] == makeInvalidRuleError(line)
+
+def test_rule_followed_by_line_invalid_rule_error():
+    rule = makeLexicalRule(makeLine("TEST"), False, "TEST", "\\w+")
+    line = makeLine("there is nothing useful here")
+    lexicalSpec = makeLexicalSpec([rule, line])
+    errors = validate_lexical_spec(lexicalSpec)
+    assert len(errors) == 1
+    assert errors[0] == makeInvalidRuleError(line)
+
+def test_multiple_errors():
+    validName = makeLexicalRule(makeLine("NAME"), False, "NAME", "-")
+    invalidName = makeLexicalRule(makeLine("name"), False, "name", "")
+    duplicateName = makeLexicalRule(makeLine("NAME"), False, "NAME", "\\s+")
+    line = makeLine("no rules here")
+    lexicalSpec = makeLexicalSpec([validName, invalidName, duplicateName, line])
+    errors = validate_lexical_spec(lexicalSpec)
+    assert len(errors) == 3
+    assert errors[0] == makeInvalidNameFormatError(invalidName)
+    assert errors[1] == makeDuplicateNameError(duplicateName)
+    assert errors[2] == makeInvalidRuleError(line)
 
 def makeLexicalSpec(ruleList=None):
     return LexicalSpec(ruleList)
@@ -26,12 +114,16 @@ def makeLine(string, lineNumber=1, file=None):
     return Line(string, lineNumber, file)
 
 def makeInvalidNameFormatError(rule):
-    message = f"Invalid name format for rule '{rule.name}': Must be uppercase letters, numbers, and underscores, and cannot start with a number"
+    message = f"Invalid name format for rule '{rule.name}' (Must be uppercase letters, numbers, and underscores, and cannot start with a number) on line: {rule.line.number}"
     return makeValidationError(rule.line, message)
 
 def makeDuplicateNameError(rule):
-    message = f"Duplicate rule name found: {rule.name}"
-    return makeValidationError(line.line, message)
+    message = f"Duplicate rule name found '{rule.name}' on line: {rule.line.number}"
+    return makeValidationError(rule.line, message)
+
+def makeInvalidRuleError(line):
+    message = f"Invalid rule format found on line: {line.number}"
+    return makeValidationError(line, message)
 
 def makeValidationError(line, message):
     return ValidationError(line, message)
