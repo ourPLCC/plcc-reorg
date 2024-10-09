@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 import re
 from re import Match
-
 from ..load_rough_spec.parse_lines import Line
 
 @dataclass
@@ -31,14 +30,18 @@ class LexicalParser():
         if not self.lines:
             return self.spec
         for line in self.lines:
-            if self._isBlankOrComment(line.string.strip()):
+            if self._isBlankOrComment(line):
                 continue
+            else:
+                self._processLine(line)
+        return self.spec
+
+    def _processLine(self, line: Line):
             lineIsSkipToken, lineIsRegularToken = self._matchToken(line.string)
             if lineIsSkipToken or lineIsRegularToken:
                 self.spec.ruleList.append(self._generateTokenRule(line, lineIsSkipToken, lineIsRegularToken))
             else:
                 self.spec.ruleList.append(line)
-        return self.spec
 
     def _generateTokenRule(self, line: Line, lineIsSkipToken: Match[str], lineIsRegularToken: Match[str]) -> LexicalRule:
         if lineIsSkipToken:
@@ -46,13 +49,8 @@ class LexicalParser():
         elif lineIsRegularToken:
             return self._generateRegularToken(line, lineIsRegularToken['Name'], lineIsRegularToken['Pattern'])
 
-    def _isBlankOrComment(self, lineStr: str) -> bool:
-        if lineStr == '':
-            return True
-        elif lineStr.startswith('#'):
-            return True
-        else:
-            return False
+    def _isBlankOrComment(self, line: Line) -> bool:
+        return not line.string.strip() or line.string.strip().startswith("#")
 
     def _matchToken(self, lineStr: str) -> tuple[Match[str] | None, Match[str] | None]:
         isSkipToken = re.match(self.patterns['skipToken'], lineStr)
