@@ -3,7 +3,7 @@ from pytest import raises, mark, fixture
 from ..load_rough_spec.parse_lines import Line
 from ..load_rough_spec.parse_blocks import Block
 from .validate_lexical_spec import ValidationError, validate_lexical_spec
-from .parse_lexical_spec import LexicalRule, LexicalSpec
+from ..parse_spec.parse_lexical_spec import LexicalRule, LexicalSpec
 
 def test_empty_no_errors():
     lexicalSpec = makeLexicalSpec([])

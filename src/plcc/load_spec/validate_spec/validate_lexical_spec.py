@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import re
 from ..load_rough_spec.parse_lines import Line
-from .parse_lexical_spec import LexicalSpec, LexicalRule
+from ..parse_spec.parse_lexical_spec import LexicalSpec, LexicalRule
 
 @dataclass
 class ValidationError:
