@@ -92,16 +92,15 @@ def test_rule_followed_by_line_invalid_rule_error():
     assert len(errors) == 1
     assert errors[0] == makeInvalidRuleError(line)
 
-def test_duplicate_patterns_not_allowed():
-    pattern = makeLexicalRule(makeLine("TEST \'\\w+\'"), False, "TEST", "\\w+")
-    duplicatePattern = makeLexicalRule(makeLine("TEST2 \'\\w+\'"), False, "TEST2", "\\w+")
-    lexicalSpec = makeLexicalSpec([pattern, duplicatePattern])
+def test_closing_quotes_pattern_is_an_error():
+    closingQuotes = makeLexicalRule(makeLine("TEST \'\"\'"), False, "TEST", "\"")
+    lexicalSpec = makeLexicalSpec([closingQuotes])
     errors = validate_lexical_spec(lexicalSpec)
     assert len(errors) == 1
-    assert errors[0] == makeDuplicatePatternError(duplicatePattern)
+    assert errors[0] == makeInvalidPatternError(closingQuotes)
 
-def test_patterns_with_closing_quotes_is_an_error():
-    closingQuotes = makeLexicalRule(makeLine("TEST \'\\w+\'"), False, "TEST", "\"")
+def test_closing_quotes_anywhere_in_pattern_is_an_error():
+    closingQuotes = makeLexicalRule(makeLine("TEST \'+\"\'"), False, "TEST", "+\"")
     lexicalSpec = makeLexicalSpec([closingQuotes])
     errors = validate_lexical_spec(lexicalSpec)
     assert len(errors) == 1
@@ -141,7 +140,7 @@ def makeDuplicatePatternError(rule):
     return makeValidationError(rule.line, message)
 
 def makeInvalidPatternError(rule):
-    message = f"Duplicate pattern format found '{rule.pattern}' on line: {rule.line.number} (Patterns can not contain closing closing quotes)"
+    message = f"Invalid pattern format found '{rule.pattern}' on line: {rule.line.number} (Patterns can not contain closing closing quotes)"
     return makeValidationError(rule.line, message)
 
 def makeInvalidRuleError(line):
