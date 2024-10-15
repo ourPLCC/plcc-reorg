@@ -32,6 +32,25 @@ def test_valid_line_no_errors():
     assert len(errors) == 0
 
 
+def test_distinct_resolved_name():
+    rule_1 = makeSyntacticRule(
+            makeLine("<sentence>:Answer ::= VERB PERIOD"),
+            makeLhsNonTerminal("sentence", "Answer"),
+            [makeTerminal("VERB"), makeTerminal("PERIOD")]
+        )
+    rule_2 = makeSyntacticRule(
+            makeLine("<sentence>:Question ::= WORD MARK"),
+            makeLhsNonTerminal("sentence", "Question"),
+            [makeTerminal("WORD"), makeTerminal("MARK")]
+        )
+    spec = [
+        rule_1,
+        rule_2
+    ]
+    errors = validate_syntactic_spec(spec)
+    assert len(errors) == 0
+
+
 def test_valid_lhs_alt_name():
     line = makeLine("<sentence>:Name_Version_1 ::= WORD WORD WORD")
     terminal = makeTerminal("WORD")
@@ -106,6 +125,66 @@ def test_underscore_lhs_alt_name():
     assert errors[0] == makeInvalidLhsAltNameFormatError(spec[0])
 
 
+def test_duplicate_lhs_name():
+    rule_1 = makeSyntacticRule(
+            makeLine("<sentence> ::= VERB PERIOD"),
+            makeLhsNonTerminal("sentence"),
+            [makeTerminal("VERB"), makeTerminal("PERIOD")]
+        )
+    rule_2 = makeSyntacticRule(
+            makeLine("<sentence> ::= WORD MARK"),
+            makeLhsNonTerminal("sentence"),
+            [makeTerminal("WORD"), makeTerminal("MARK")]
+        )
+    spec = [
+        rule_1,
+        rule_2
+    ]
+    errors = validate_syntactic_spec(spec)
+    assert len(errors) == 1
+    assert errors[0] == makeDuplicateLhsError(spec[1])
+
+
+def test_duplicate_lhs_alt_name():
+    rule_1 = makeSyntacticRule(
+            makeLine("<sentence>:Name ::= VERB PERIOD"),
+            makeLhsNonTerminal("sentence", "Name"),
+            [makeTerminal("VERB"), makeTerminal("PERIOD")]
+        )
+    rule_2 = makeSyntacticRule(
+            makeLine("<sentence>:Name ::= WORD MARK"),
+            makeLhsNonTerminal("sentence", "Name"),
+            [makeTerminal("WORD"), makeTerminal("MARK")]
+        )
+    spec = [
+        rule_1,
+        rule_2
+    ]
+    errors = validate_syntactic_spec(spec)
+    assert len(errors) == 1
+    assert errors[0] == makeDuplicateLhsError(spec[1])
+
+
+def test_duplicate_resolved_name():
+    rule_1 = makeSyntacticRule(
+            makeLine("<sentence>:Name ::= VERB PERIOD"),
+            makeLhsNonTerminal("sentence", "Name"),
+            [makeTerminal("VERB"), makeTerminal("PERIOD")]
+        )
+    rule_2 = makeSyntacticRule(
+            makeLine("<name> ::= WORD MARK"),
+            makeLhsNonTerminal("name"),
+            [makeTerminal("WORD"), makeTerminal("MARK")]
+        )
+    spec = [
+        rule_1,
+        rule_2
+    ]
+    errors = validate_syntactic_spec(spec)
+    assert len(errors) == 1
+    assert errors[0] == makeDuplicateLhsError(spec[1])
+
+
 def makeSyntacticSpec(ruleList=None):
     return SyntacticSpec(ruleList)
 
@@ -138,3 +217,9 @@ def makeInvalidLhsNameFormatError(rule):
 def makeInvalidLhsAltNameFormatError(rule):
     message = f"Invalid LHS alternate name format for rule: '{rule.line.string}' (must start with a upper-case letter, and may contain upper or lower case letters, numbers and/or underscore) on line: {rule.line.number}"
     return makeValidationError(rule.line, message)
+
+
+def makeDuplicateLhsError(rule):
+    message = f"Duplicate lhs name: '{rule.line.string}' on line: {rule.line.number}"
+    return makeValidationError(rule.line, message)
+
