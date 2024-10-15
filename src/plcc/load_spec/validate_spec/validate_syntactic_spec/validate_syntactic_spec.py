@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 import re
 from ...load_rough_spec.parse_lines import Line
 from ...parse_spec.parse_syntactic_spec import SyntacticSpec, SyntacticRule, LhsNonTerminal
@@ -25,31 +26,43 @@ class SyntacticValidator:
     def validate(self) -> list:
         if not self.syntacticSpec:
             return self.errorList
-        for rule in self.syntacticSpec:
-            self._handleLHS(rule)
-        # for rule in self.syntacticSpec:
-            # self._handleRHS(rule)
+        self._validateLhs()
         return self.errorList
 
-    def _handleLHS(self, rule: SyntacticRule | Line):
-        if isinstance(rule, SyntacticRule):
-            self._checkLHS(rule)
-        else:
-            self._checkForLine(rule)
+    def _validateLhs(self):
+        lhs_error_list, non_terminal_set = SyntacticLhsValidator(self.syntacticSpec).validate()
+        if lhs_error_list:
+            self.errorList = (lhs_error_list)
+        self.nonTerminals = non_terminal_set
 
-    def _checkLHS(self, rule: SyntacticRule):
+
+
+class SyntacticLhsValidator:
+    syntacticSpec: SyntacticSpec
+
+    def __init__(self, syntacticSpec: SyntacticSpec):
+        self.syntacticSpec = syntacticSpec
+        self.errorList = []
+        self.nonTerminals = set()
+
+    def validate(self):
+        for rule in self.syntacticSpec:
+            self._check(rule)
+        return self.errorList, self.nonTerminals
+
+    def _check(self, rule: SyntacticRule):
         resolved_name = rule.lhs.name.capitalize()
-        self._checkLHSNonTerminalName(rule)
+        self._checkName(rule)
         if rule.lhs.altName:
-            self._checkLHSNonTerminalAltName(rule)
+            self._checkAltName(rule)
             resolved_name = rule.lhs.altName
         self._appendNonTerminals(rule, resolved_name)
 
-    def _checkLHSNonTerminalName(self, rule: SyntacticRule):
+    def _checkName(self, rule: SyntacticRule):
         if not re.match(r"^[a-z][a-zA-Z0-9_]+$", rule.lhs.name):
             self._appendInvalidLhsNameError(rule)
 
-    def _checkLHSNonTerminalAltName(self, rule: SyntacticRule):
+    def _checkAltName(self, rule: SyntacticRule):
         if not re.match(r"^[A-Z][a-zA-Z0-9_]+$", rule.lhs.altName):
             self._appendInvalidLhsAltNameError(rule)
 
@@ -57,10 +70,6 @@ class SyntacticValidator:
         if non_terminal in self.nonTerminals:
             self._appendDuplicateLhsError(rule)
         self.nonTerminals.add(non_terminal)
-
-    def _checkForLine(self, line: Line):
-        message = f"Invalid rule format found on line: {line.number}"
-        self.errorList.append(ValidationError(line=line, message=message))
 
     def _appendInvalidLhsNameError(self, rule: SyntacticRule):
         message = f"Invalid LHS name format for rule: '{rule.line.string}' (must start with a lower-case letter, and may contain upper or lower case letters, numbers and/or underscore) on line: {rule.line.number}"
