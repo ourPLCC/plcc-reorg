@@ -30,7 +30,7 @@ class SyntacticValidator:
         return self.errorList
 
     def _validateLhs(self):
-        lhs_error_list, non_terminal_set = SyntacticLhsValidator(self.syntacticSpec).validate()
+        lhs_error_list, non_terminal_set = SyntacticLhsValidator(self.syntacticSpec.copy()).validate()
         if lhs_error_list:
             self.errorList = (lhs_error_list)
         self.nonTerminals = non_terminal_set
@@ -38,47 +38,55 @@ class SyntacticValidator:
 
 
 class SyntacticLhsValidator:
-    syntacticSpec: SyntacticSpec
+    spec: SyntacticSpec
 
     def __init__(self, syntacticSpec: SyntacticSpec):
-        self.syntacticSpec = syntacticSpec
+        self.spec = syntacticSpec
         self.errorList = []
         self.nonTerminals = set()
 
     def validate(self):
-        for rule in self.syntacticSpec:
-            self._check(rule)
+        while len(self.spec) > 0:
+            self.rule = self.spec.pop(0)
+            self._check()
         return self.errorList, self.nonTerminals
 
-    def _check(self, rule: SyntacticRule):
-        resolved_name = rule.lhs.name.capitalize()
-        self._checkName(rule)
-        if rule.lhs.altName:
-            self._checkAltName(rule)
-            resolved_name = rule.lhs.altName
-        self._appendNonTerminals(rule, resolved_name)
+    def _check(self):
+        lhs = self.rule.lhs
+        name = lhs.name
+        alt_name = lhs.altName
+        self._checkName(name)
+        if alt_name:
+            self._checkAltName(alt_name)
+            resolved_name = self.rule.lhs.altName
+        else:
+            resolved_name = name.capitalize()
+        self._appendNonTerminals(resolved_name)
 
-    def _checkName(self, rule: SyntacticRule):
-        if not re.match(r"^[a-z][a-zA-Z0-9_]+$", rule.lhs.name):
-            self._appendInvalidLhsNameError(rule)
+    def _checkName(self, name: str):
+        if not re.match(r"^[a-z][a-zA-Z0-9_]+$", name):
+            self._appendInvalidLhsNameError()
 
-    def _checkAltName(self, rule: SyntacticRule):
-        if not re.match(r"^[A-Z][a-zA-Z0-9_]+$", rule.lhs.altName):
-            self._appendInvalidLhsAltNameError(rule)
+    def _checkAltName(self, alt_name: str):
+        if not re.match(r"^[A-Z][a-zA-Z0-9_]+$", alt_name):
+            self._appendInvalidLhsAltNameError()
 
-    def _appendNonTerminals(self, rule: SyntacticRule, non_terminal: str):
-        if non_terminal in self.nonTerminals:
-            self._appendDuplicateLhsError(rule)
-        self.nonTerminals.add(non_terminal)
+    def _appendNonTerminals(self, name: str):
+        if name in self.nonTerminals:
+            self._appendDuplicateLhsError()
+        self.nonTerminals.add(name)
 
-    def _appendInvalidLhsNameError(self, rule: SyntacticRule):
+    def _appendInvalidLhsNameError(self):
+        rule = self.rule
         message = f"Invalid LHS name format for rule: '{rule.line.string}' (must start with a lower-case letter, and may contain upper or lower case letters, numbers and/or underscore) on line: {rule.line.number}"
         self.errorList.append(ValidationError(line=rule.line, message=message))
 
-    def _appendInvalidLhsAltNameError(self, rule: SyntacticRule):
+    def _appendInvalidLhsAltNameError(self):
+        rule = self.rule
         message = f"Invalid LHS alternate name format for rule: '{rule.line.string}' (must start with a upper-case letter, and may contain upper or lower case letters, numbers and/or underscore) on line: {rule.line.number}"
         self.errorList.append(ValidationError(line=rule.line, message=message))
 
-    def _appendDuplicateLhsError(self, rule: SyntacticRule):
+    def _appendDuplicateLhsError(self):
+        rule = self.rule
         message = f"Duplicate lhs name: '{rule.line.string}' on line: {rule.line.number}"
         self.errorList.append(ValidationError(line=rule.line, message=message))
