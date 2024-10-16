@@ -1,5 +1,5 @@
 from .LL1Checker_and_Grammar import LL1Checker
-from .LL1wrapper_and_SpecGrammar import SpecGrammar
+from .LL1Wrapper_and_SpecGrammar import SpecGrammar
 
 def checkLL1(syntactic_spec):
     LL1Validator(syntactic_spec).validate()

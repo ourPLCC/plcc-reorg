@@ -4,7 +4,7 @@ from plcc.load_spec.parse_spec.parse_syntactic_spec.structs import (
 from .LL1Checker_and_Grammar import Grammar
 
 class LL1Wrapper:
-    def __init__(self, symbolName: str, specObject: Object):
+    def __init__(self, symbolName: str, specObject):
         self.name = symbolName
         self.specObject = specObject
 
@@ -15,23 +15,31 @@ class LL1Wrapper:
         return hash(self.name)
 
 class SpecGrammar(Grammar):
-    def __init__(self):
+    def __init__(self, syntacticSpec):
         super().__init__()
         self.rules = {}
+        self.processSyntacticSpec(syntacticSpec)
 
-    def addRule(self, nonterminal: LL1Wrapper, form: (LL1Wrapper, LL1Wrapper)):
-        wrappedNonterminal = Wrapper(nonterminal.name, nonterminal)
-        wrappedForm = tuple(Wrapper(symbol.name, symbol) for symbol in form)
+    def processSyntacticSpec(self, syntacticSpec):
+        for rule in syntacticSpec:
+            nonterminal = LL1Wrapper(rule.lhs.name, rule.lhs)
+            rhsWrappers = []
 
-        if wrappedNonterminal not in self.rules:
-            self.rules[wrappedNonterminal] = []
-        self.rules[wrappedNonterminal].append(wrappedForm)
+            for sym in rule.rhsSymbolList:
+                wrappedSym = LL1Wrapper(sym.name, sym)
+                rhsWrappers.append(wrappedSym)
+            self.addRule(nonterminal, tuple(rhsWrappers))
+
+    def addRule(self, nonterminal: LL1Wrapper, form: (LL1Wrapper)):
+        if nonterminal not in self.rules:
+            self.rules[nonterminal] = []
+        self.rules[nonterminal].append(form)
 
     def isTerminal(self, object):
-        return isinstance(object.specObject, Terminal)
+        return isinstance(specObject, Terminal)
 
     def isNonterminal(self, object):
-        return isinstance(object.specObject, NonTerminal)
+        return isinstance(specObject, NonTerminal)
 
     def getRules(self):
         return self.rules

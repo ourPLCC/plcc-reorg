@@ -1,5 +1,5 @@
-from .LL1wrapper import LL1Wrapper
 from dataclasses import dataclass
+from collections import defaultdict
 
 @dataclass
 class ValidationError:
@@ -48,17 +48,33 @@ class Grammar:
 class LL1Checker:
     def __init__(self, grammar: Grammar):
         self.grammar = grammar
-        self.firstSets = {}
-        self.followSets = {}
-        self.parsingTable = {}
+        self.firstSets = defaultdict(set)
+        self.followSets = defaultdict(set)
+        self.parsingTable = defaultdict(dict)
+        self.errorList = []
+        self.memoDeriveEmpty = {}
+        self.memoFirst = {}
 
     def check(self) -> list[ValidationError]:
-        pass
+        self._generateFirstSets()
+        self._generateFollowSets()
+        self._buildParsingTable()
+        self._checkParsingTable()
+        return self.errorList
 
     def _generateFirstSets(self):
         pass
 
+    def _computeFirst(self, symbol):
+        pass
+
     def _generateFollowSets(self):
+        pass
+
+    def _computeFollow(self, nonterminal):
+        pass
+
+    def _canDeriveEmptyString(self, symbol):
         pass
 
     def _buildParsingTable(self):
