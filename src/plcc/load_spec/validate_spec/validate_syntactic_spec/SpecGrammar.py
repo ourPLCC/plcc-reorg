@@ -1,20 +1,8 @@
 from plcc.load_spec.parse_spec.parse_syntactic_spec.structs import (
     NonTerminal, Terminal
 )
-from .LL1Checker_and_Grammar import Grammar
-
-class LL1Wrapper:
-    def __init__(self, symbolName: str, specObject):
-        self.name = symbolName
-        self.specObject = specObject
-
-    def __eq__(self, other):
-        if self.specObject is None or other.specObject is None:
-            return self is other
-        return isinstance(other, LL1Wrapper) and self.name == other.name
-
-    def __hash__(self):
-        return hash(self.name)
+from .Grammar import Grammar
+from .LL1Wrapper import LL1Wrapper
 
 class SpecGrammar(Grammar):
     def __init__(self, syntacticSpec):

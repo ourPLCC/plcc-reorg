@@ -1,4 +1,4 @@
-from .LL1Checker_and_Grammar import LL1Checker
+from .LL1Checker import LL1Checker
 from .LL1Wrapper_and_SpecGrammar import SpecGrammar
 
 def checkLL1(syntactic_spec):
