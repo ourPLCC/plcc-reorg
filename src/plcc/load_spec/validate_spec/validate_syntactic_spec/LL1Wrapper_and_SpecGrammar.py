@@ -17,6 +17,8 @@ class LL1Wrapper:
 class SpecGrammar(Grammar):
     def __init__(self, syntacticSpec):
         super().__init__()
+        self.epsilon = LL1Wrapper("", None)
+        self.eof = LL1Wrapper(chr(26), None)
         self.rules = {}
         self.processSyntacticSpec(syntacticSpec)
 
@@ -36,12 +38,18 @@ class SpecGrammar(Grammar):
         self.rules[nonterminal].append(form)
 
     def isTerminal(self, object):
-        return isinstance(specObject, Terminal)
+        return isinstance(object, Terminal)
 
     def isNonterminal(self, object):
-        return isinstance(specObject, NonTerminal)
+        return isinstance(object, NonTerminal)
 
     def getRules(self):
         return self.rules
+    
+    def getEpsilon(self):
+        return self.epsilon
+    
+    def getEOF(self):
+        return self.eof 
 
 
