@@ -32,6 +32,13 @@ def test_get_start_symbol():
     grammar.addRule(nonterminal, [generateTerminal()])
     assert grammar.getStartSymbol() == nonterminal
 
+def test_multiple_rules_one_nonterminal():
+    grammar = Grammar()
+    nonterminal = generateNonterminal()
+    grammar.addRule(nonterminal, [generateTerminal()])
+    grammar.addRule(nonterminal, [generateTerminal()])
+    assert grammar.getRules() == {nonterminal: [[generateTerminal()], [generateTerminal()]]}
+
 def generateNonterminal():
     return 'nonTerminal'
 
