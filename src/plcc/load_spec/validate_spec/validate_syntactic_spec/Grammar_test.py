@@ -1,6 +1,13 @@
 from pytest import raises, mark, fixture
 from .Grammar import Grammar
 
+def test_empty_grammar():
+    grammar = Grammar()
+    assert grammar.getRules() == {}
+    assert grammar.getNonterminals() == set()
+    assert grammar.getTerminals() == set()
+    assert grammar.getStartSymbol() == None
+
 def test_add_rule():
     grammar = Grammar()
     nonterminal = generateNonterminal()
