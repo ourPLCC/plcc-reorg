@@ -16,7 +16,11 @@ def test_is_terminal():
     assert grammar.isTerminal(terminal) == True
     assert grammar.isNonterminal(terminal) == False
 
-
+def test_is_nonterminal():
+    grammar = Grammar()
+    nonterminal = generateNonterminal()
+    assert grammar.isTerminal(nonterminal) == False
+    assert grammar.isNonterminal(nonterminal) == True
 
 
 def generateNonterminal():
