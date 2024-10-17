@@ -1,9 +1,7 @@
-from dataclasses import dataclass
 from collections import defaultdict
+from .Grammar import Grammar
+from .errors import ValidationError
 
-@dataclass
-class ValidationError:
-    message: str
 
 class LL1Checker:
     def __init__(self, grammar: Grammar):

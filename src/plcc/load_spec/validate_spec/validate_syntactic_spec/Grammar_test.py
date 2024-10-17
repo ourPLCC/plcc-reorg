@@ -1,5 +1,6 @@
 from pytest import raises, mark, fixture
 from .Grammar import Grammar
+from .errors import ValidationError
 
 def test_empty_grammar():
     grammar = Grammar()
@@ -74,6 +75,8 @@ def test_no_duplicate_nonterminals():
     grammar.addRule(nonterminal, [generateTerminal()])
     assert len(grammar.getNonterminals()) == 1
     assert nonterminal in grammar.getNonterminals()
+
+
 
 def generateNonterminal():
     return 'nonTerminal'
