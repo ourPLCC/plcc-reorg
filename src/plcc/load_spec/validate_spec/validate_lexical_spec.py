@@ -47,7 +47,7 @@ class LexicalValidator:
             self.names.add(rule.name)
 
     def _checkPatternFormat(self, rule: LexicalRule):
-        if "\'" in rule.pattern or "\"" in rule.pattern:
+        if "\'" in rule.pattern or "\"" in rule.pattern or rule.pattern == '':
             message = f"Invalid pattern format found '{rule.pattern}' on line: {rule.line.number} (Patterns can not contain closing closing quotes)"
             self.errorList.append(ValidationError(line=rule.line, message=message))
 
