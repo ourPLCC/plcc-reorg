@@ -44,7 +44,7 @@ def test_multiple_rules_one_nonterminal(grammar, nonterminal, terminal):
 
 def test_add_multiple_nonterminals(grammar, nonterminal, terminal):
     grammar.addRule(nonterminal, [terminal])
-    diffNonterminal = nonterminal + 'diff'
+    diffNonterminal = getDiffNonterminal()
     grammar.addRule(diffNonterminal, [])
     assert grammar.getRules() == {nonterminal: [[terminal]], diffNonterminal: [[]]}
 
@@ -52,6 +52,13 @@ def test_add_same_terminal(grammar, nonterminal, terminal):
     grammar.addRule(nonterminal, [terminal])
     grammar.addRule(nonterminal, [terminal])
     assert grammar.getRules() == {nonterminal: [[terminal], [terminal]]}
+
+def test_add_terminal_and_nonterminal_to_sets(grammar, nonterminal, terminal):
+    diffNonterminal = getDiffNonterminal()
+    grammar.addRule(nonterminal, [terminal, diffNonterminal])
+    assert grammar.getRules() == {nonterminal: [[terminal, diffNonterminal]]}
+    assert diffNonterminal in grammar.getNonterminals()
+    assert terminal in grammar.getTerminals()
 
 def test_no_duplicate_terminals(grammar, nonterminal, terminal):
     grammar.addRule(nonterminal, [terminal])
@@ -76,3 +83,6 @@ def test_invalid_terminal_name_throws_invalid_parameter_error(grammar, nontermin
 def test_invalid_form_list_throws_invalid_parameter_error(grammar, nonterminal, terminal):
     with raises(InvalidParameterError):
         grammar.addRule(nonterminal, terminal)
+
+def getDiffNonterminal():
+    return 'nonTerminalDiff'
