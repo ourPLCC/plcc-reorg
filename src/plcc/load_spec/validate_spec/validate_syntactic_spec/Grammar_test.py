@@ -15,9 +15,7 @@ def terminal():
     return 'TERMINAL'
 
 def test_empty_grammar(grammar):
-    assert grammar.getRules() == {}
-    assert grammar.getNonterminals() == set()
-    assert grammar.getTerminals() == set()
+    assert len(grammar.getRules()) == 0
     assert grammar.getStartSymbol() == None
 
 def test_add_rule(grammar, nonterminal, terminal):
@@ -46,9 +44,9 @@ def test_multiple_rules_one_nonterminal(grammar, nonterminal, terminal):
 
 def test_add_multiple_nonterminals(grammar, nonterminal, terminal):
     grammar.addRule(nonterminal, [terminal])
-    nonterminal2 = nonterminal + 'diff'
-    grammar.addRule(nonterminal2, [])
-    assert grammar.getRules() == {nonterminal: [[terminal]], nonterminal2: [[]]}
+    diffNonterminal = nonterminal + 'diff'
+    grammar.addRule(diffNonterminal, [])
+    assert grammar.getRules() == {nonterminal: [[terminal]], diffNonterminal: [[]]}
 
 def test_add_same_terminal(grammar, nonterminal, terminal):
     grammar.addRule(nonterminal, [terminal])

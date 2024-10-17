@@ -13,9 +13,7 @@ class Grammar:
     def addRule(self, nonterminal: str, form: list[str]):
         self.nonterminal = nonterminal
         self.form = form
-
         self._checkParametersForErrors()
-
         self._handleRule()
         self._populateTerminalsAndNonterminals(form)
         self._updateStartSymbol()
@@ -23,10 +21,8 @@ class Grammar:
     def _checkParametersForErrors(self):
         if not self.isNonterminal(self.nonterminal):
             raise InvalidParameterError(str(self.nonterminal))
-        
         if not isinstance(self.form, list):
             raise InvalidParameterError(str(self.form))
-        
         for symbol in self.form:
             if not (self.isNonterminal(symbol) or self.isTerminal(symbol)):
                 raise InvalidParameterError(str(symbol))
