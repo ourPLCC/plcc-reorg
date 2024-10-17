@@ -10,6 +10,15 @@ def test_add_rule():
     assert nonterminal in grammar.getNonterminals()
     assert terminal in grammar.getTerminals()
 
+def test_is_terminal():
+    grammar = Grammar()
+    terminal = generateTerminal()
+    assert grammar.isTerminal(terminal) == True
+    assert grammar.isNonterminal(terminal) == False
+
+
+
+
 def generateNonterminal():
     return 'nonTerminal'
 
