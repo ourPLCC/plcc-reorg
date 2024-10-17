@@ -22,6 +22,11 @@ def test_is_nonterminal():
     assert grammar.isTerminal(nonterminal) == False
     assert grammar.isNonterminal(nonterminal) == True
 
+def test_get_start_symbol_none():
+    grammar = Grammar()
+    assert grammar.getStartSymbol() == None
+
+
 
 def generateNonterminal():
     return 'nonTerminal'
