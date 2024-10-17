@@ -11,14 +11,17 @@ class Grammar:
             self.rules[nonterminal] = []
         self.rules[nonterminal].append(form)
 
+        self._populateTerminalsAndNonterminals(form)
+
+        if self.startSymbol is None:
+            self.startSymbol = nonterminal
+    
+    def _populateTerminalsAndNonterminals(self, form: list[str]):
         for symbol in form:
             if self.isTerminal(symbol):
                 self.terminals.add(symbol)
             elif self.isNonterminal(symbol):
                 self.nonterminals.add(symbol)
-
-        if self.startSymbol is None:
-            self.startSymbol = nonterminal
 
     def getStartSymbol(self) -> str:
         return self.startSymbol
