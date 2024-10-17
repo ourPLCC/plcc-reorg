@@ -26,7 +26,11 @@ def test_get_start_symbol_none():
     grammar = Grammar()
     assert grammar.getStartSymbol() == None
 
-
+def test_get_start_symbol():
+    grammar = Grammar()
+    nonterminal = generateNonterminal()
+    grammar.addRule(nonterminal, [generateTerminal()])
+    assert grammar.getStartSymbol() == nonterminal
 
 def generateNonterminal():
     return 'nonTerminal'
