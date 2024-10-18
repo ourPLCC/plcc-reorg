@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 import re
 from ...load_rough_spec.parse_lines import Line
 from ...parse_spec.parse_syntactic_spec import SyntacticSpec, SyntacticRule, LhsNonTerminal
@@ -48,20 +47,21 @@ class SyntacticLhsValidator:
     def validate(self):
         while len(self.spec) > 0:
             self.rule = self.spec.pop(0)
-            self._check()
+            self._checkLine()
         return self.errorList, self.nonTerminals
 
-    def _check(self):
-        lhs = self.rule.lhs
-        name = lhs.name
-        alt_name = lhs.altName
+    def _checkLine(self):
+        name, alt_name = self._getNames()
         self._checkName(name)
         if alt_name:
             self._checkAltName(alt_name)
-            resolved_name = self.rule.lhs.altName
-        else:
-            resolved_name = name.capitalize()
-        self._appendNonTerminals(resolved_name)
+        self._checkDuplicates()
+
+    def _getNames(self):
+        return (
+            self.rule.lhs.name,
+            self.rule.lhs.altName
+        )
 
     def _checkName(self, name: str):
         if not re.match(r"^[a-z][a-zA-Z0-9_]+$", name):
@@ -71,7 +71,12 @@ class SyntacticLhsValidator:
         if not re.match(r"^[A-Z][a-zA-Z0-9_]+$", alt_name):
             self._appendInvalidLhsAltNameError()
 
-    def _appendNonTerminals(self, name: str):
+    def _getResolvedName(self):
+        name, alt_name = self._getNames()
+        return alt_name if alt_name else name.capitalize()
+
+    def _checkDuplicates(self):
+        name = self._getResolvedName()
         if name in self.nonTerminals:
             self._appendDuplicateLhsError()
         self.nonTerminals.add(name)
