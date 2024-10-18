@@ -1,7 +1,7 @@
 from pytest import raises, mark, fixture
 from .LL1Wrapper import LL1Wrapper
 from plcc.load_spec.parse_spec.parse_syntactic_spec.structs import (
-    LhsNonTerminal, RhsNonTerminal, Terminal, Symbol
+    LhsNonTerminal, RhsNonTerminal
 )
 
 @fixture
