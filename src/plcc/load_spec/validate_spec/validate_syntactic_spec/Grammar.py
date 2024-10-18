@@ -7,31 +7,27 @@ class Grammar:
         self.startSymbol = None
         self.terminals = set()
         self.nonterminals = set()
-        self.nonterminal = None
-        self.form = None
 
     def addRule(self, nonterminal: str, form: list[str]):
-        self.nonterminal = nonterminal
-        self.form = form
-        self._checkParametersForErrors()
-        self._handleRule()
+        self._checkParametersForErrors(nonterminal, form)
+        self._handleRule(nonterminal, form)
         self._populateTerminalsAndNonterminals(form)
-        self._updateStartSymbol()
-    
-    def _checkParametersForErrors(self):
-        if not self.isNonterminal(self.nonterminal):
-            raise InvalidParameterError(str(self.nonterminal))
-        if not isinstance(self.form, list):
-            raise InvalidParameterError(str(self.form))
-        for symbol in self.form:
+        self._updateStartSymbol(nonterminal)
+
+    def _checkParametersForErrors(self, nonterminal: str, form: list[str]):
+        if not self.isNonterminal(nonterminal):
+            raise InvalidParameterError(str(nonterminal))
+        if not isinstance(form, list):
+            raise InvalidParameterError(str(form))
+        for symbol in form:
             if not (self.isNonterminal(symbol) or self.isTerminal(symbol)):
                 raise InvalidParameterError(str(symbol))
-            
-    def _handleRule(self):
-        self.nonterminals.add(self.nonterminal)
-        if self.nonterminal not in self.rules:
-            self.rules[self.nonterminal] = []
-        self.rules[self.nonterminal].append(self.form)
+
+    def _handleRule(self, nonterminal: str, form: list[str]):
+        self.nonterminals.add(nonterminal)
+        if nonterminal not in self.rules:
+            self.rules[nonterminal] = []
+        self.rules[nonterminal].append(form)
 
     def _populateTerminalsAndNonterminals(self, form: list[str]):
         for symbol in form:
@@ -40,9 +36,9 @@ class Grammar:
             elif self.isNonterminal(symbol):
                 self.nonterminals.add(symbol)
 
-    def _updateStartSymbol(self):
+    def _updateStartSymbol(self, nonterminal: str):
         if self.startSymbol is None:
-            self.startSymbol = self.nonterminal
+            self.startSymbol = nonterminal
 
     def getStartSymbol(self) -> str:
         return self.startSymbol
