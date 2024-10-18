@@ -1,6 +1,6 @@
 class LL1Wrapper:
-    def __init__(self, symbolName: str, specObject: object):
-        self.name = symbolName
+    def __init__(self, name: str, specObject: object):
+        self.name = name
         self.specObject = specObject
 
     def __eq__(self, other):
