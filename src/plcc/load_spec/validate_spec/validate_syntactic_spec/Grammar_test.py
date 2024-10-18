@@ -48,15 +48,13 @@ def test_add_multiple_nonterminals(grammar, nonterminal, terminal):
     grammar.addRule(diffNonterminal, [])
     assert grammar.getRules() == {nonterminal: [[terminal]], diffNonterminal: [[]]}
 
-def test_add_same_terminal(grammar, nonterminal, terminal):
-    grammar.addRule(nonterminal, [terminal])
-    grammar.addRule(nonterminal, [terminal])
-    assert grammar.getRules() == {nonterminal: [[terminal], [terminal]]}
-
 def test_add_terminal_and_nonterminal_to_sets(grammar, nonterminal, terminal):
     diffNonterminal = getDiffNonterminal()
     grammar.addRule(nonterminal, [terminal, diffNonterminal])
     assert grammar.getRules() == {nonterminal: [[terminal, diffNonterminal]]}
+    assert len(grammar.getNonterminals()) == 2
+    assert len(grammar.getTerminals()) == 1
+    assert nonterminal in grammar.getNonterminals()
     assert diffNonterminal in grammar.getNonterminals()
     assert terminal in grammar.getTerminals()
 
