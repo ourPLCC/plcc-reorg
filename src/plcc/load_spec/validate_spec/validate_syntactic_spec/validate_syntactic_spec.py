@@ -1,9 +1,7 @@
 import re
-from ...load_rough_spec.parse_lines import Line
 from ...parse_spec.parse_syntactic_spec import (
     SyntacticSpec,
     SyntacticRule,
-    LhsNonTerminal,
 )
 from .errors import (
     InvalidLhsNameError,
