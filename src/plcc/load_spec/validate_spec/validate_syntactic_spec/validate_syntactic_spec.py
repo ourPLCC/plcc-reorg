@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 import re
 from ...load_rough_spec.parse_lines import Line
 from ...parse_spec.parse_syntactic_spec import (
@@ -7,10 +6,10 @@ from ...parse_spec.parse_syntactic_spec import (
     LhsNonTerminal,
 )
 from .errors import (
-    ValidationError,
     InvalidLhsNameError,
     InvalidLhsAltNameError,
     DuplicateLhsError,
+    ValidationError
 )
 
 
@@ -20,6 +19,7 @@ def validate_syntactic_spec(syntacticSpec: SyntacticSpec):
 
 class SyntacticValidator:
     syntacticSpec: SyntacticSpec
+    rule: SyntacticRule
 
     def __init__(self, syntacticSpec: SyntacticSpec):
         self.syntacticSpec = syntacticSpec
@@ -49,7 +49,7 @@ class SyntacticLhsValidator:
         self.errorList = []
         self.nonTerminals = set()
 
-    def validate(self):
+    def validate(self) -> tuple[list[ValidationError], set[str]]:
         while len(self.spec) > 0:
             self.rule = self.spec.pop(0)
             self._checkLine()
@@ -62,7 +62,7 @@ class SyntacticLhsValidator:
             self._checkAltName(alt_name)
         self._checkDuplicates()
 
-    def _getNames(self):
+    def _getNames(self) -> tuple[str, str]:
         return (self.rule.lhs.name, self.rule.lhs.altName)
 
     def _checkName(self, name: str):
@@ -73,7 +73,7 @@ class SyntacticLhsValidator:
         if not re.match(r"^[A-Z][a-zA-Z0-9_]+$", alt_name):
             self._appendInvalidLhsAltNameError()
 
-    def _getResolvedName(self):
+    def _getResolvedName(self) -> str:
         name, alt_name = self._getNames()
         return alt_name if alt_name else name.capitalize()
 
