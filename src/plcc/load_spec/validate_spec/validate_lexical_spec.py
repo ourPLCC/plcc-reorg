@@ -2,11 +2,7 @@ from dataclasses import dataclass
 import re
 from ..load_rough_spec.parse_lines import Line
 from ..parse_spec.parse_lexical_spec import LexicalSpec, LexicalRule
-
-@dataclass
-class ValidationError:
-    line: Line
-    message: str
+from .lexical_errors import ValidationError, InvalidNameFormatError, DuplicateNameError, InvalidPatternError, InvalidRuleError
 
 def validate_lexical_spec(lexicalSpec: LexicalSpec):
     return LexicalValidator(lexicalSpec).validate()
@@ -36,21 +32,17 @@ class LexicalValidator:
 
     def _checkNameFormat(self, rule: LexicalRule):
         if not self.namePattern.match(rule.name):
-            message = f"Invalid name format for rule '{rule.name}' (Must be uppercase letters, numbers, and underscores, and cannot start with a number) on line: {rule.line.number}"
-            self.errorList.append(ValidationError(line=rule.line, message=message))
+            self.errorList.append(InvalidNameFormatError(rule=rule))
 
     def _checkDuplicateNames(self, rule: LexicalRule):
         if rule.name in self.names:
-            message = f"Duplicate rule name found '{rule.name}' on line: {rule.line.number}"
-            self.errorList.append(ValidationError(line=rule.line, message=message))
+            self.errorList.append(DuplicateNameError(rule=rule))
         else:
             self.names.add(rule.name)
 
     def _checkPatternFormat(self, rule: LexicalRule):
         if "\'" in rule.pattern or "\"" in rule.pattern or rule.pattern == '':
-            message = f"Invalid pattern format found '{rule.pattern}' on line: {rule.line.number} (Patterns can not contain closing closing quotes)"
-            self.errorList.append(ValidationError(line=rule.line, message=message))
+            self.errorList.append(InvalidPatternError(rule=rule))
 
     def _checkForLine(self, line: Line):
-        message = f"Invalid rule format found on line: {line.number}"
-        self.errorList.append(ValidationError(line=line, message=message))
+        self.errorList.append(InvalidRuleError(line=line))

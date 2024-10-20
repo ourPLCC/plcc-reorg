@@ -4,6 +4,7 @@ from ..load_rough_spec.parse_lines import Line
 from ..load_rough_spec.parse_blocks import Block
 from .validate_lexical_spec import ValidationError, validate_lexical_spec
 from ..parse_spec.parse_lexical_spec import LexicalRule, LexicalSpec
+from .lexical_errors import ValidationError, InvalidNameFormatError, DuplicateNameError, InvalidPatternError, InvalidRuleError
 
 def test_empty_no_errors():
     lexicalSpec = makeLexicalSpec([])
@@ -55,7 +56,7 @@ def test_closing_quotes_pattern_is_an_error():
 def test_closing_quotes_anywhere_in_pattern_is_an_error():
     assertInvalidPattern("+\"+")
 
-def test_pattern_cant_be_empty(): #Edge Case where given pattern is "'"
+def test_pattern_cant_be_empty():
     assertInvalidPattern("")
 
 def test_pattern_cant_be_quote_with_whitespace():
@@ -83,23 +84,16 @@ def makeLine(string, lineNumber=1, file=None):
     return Line(string, lineNumber, file)
 
 def makeInvalidNameFormatError(rule):
-    message = f"Invalid name format for rule '{rule.name}' (Must be uppercase letters, numbers, and underscores, and cannot start with a number) on line: {rule.line.number}"
-    return makeValidationError(rule.line, message)
+    return InvalidNameFormatError(rule=rule)
 
 def makeDuplicateNameError(rule):
-    message = f"Duplicate rule name found '{rule.name}' on line: {rule.line.number}"
-    return makeValidationError(rule.line, message)
+    return DuplicateNameError(rule=rule)
 
 def makeInvalidPatternError(rule):
-    message = f"Invalid pattern format found '{rule.pattern}' on line: {rule.line.number} (Patterns can not contain closing closing quotes)"
-    return makeValidationError(rule.line, message)
+    return InvalidPatternError(rule=rule)
 
 def makeInvalidRuleError(line):
-    message = f"Invalid rule format found on line: {line.number}"
-    return makeValidationError(line, message)
-
-def makeValidationError(line, message):
-    return ValidationError(line, message)
+    return InvalidRuleError(line=line)
 
 def assertInvalidName(name: str):
     invalidName = makeLexicalRule(name=name)
