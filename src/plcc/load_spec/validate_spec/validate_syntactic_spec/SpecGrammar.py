@@ -26,7 +26,8 @@ class SpecGrammar(Grammar):
         self._validateRuleLHS(rule.lhs)
         nonterminal = LL1Wrapper(rule.lhs.name, rule.lhs)
         rhsWrappers = [self._wrapSymbol(sym) for sym in rule.rhsSymbolList]
-        self.addRule(nonterminal, tuple(rhsWrappers))
+        separatorWrapper = self._wrapSymbol(rule.separator) if rule.separator else None
+        self.addRule(nonterminal, tuple(rhsWrappers), separatorWrapper)
 
     def _validateRuleLHS(self, lhs: NonTerminal) -> None:
         if not isinstance(lhs, NonTerminal):
@@ -40,10 +41,13 @@ class SpecGrammar(Grammar):
         if not isinstance(sym, (Terminal, NonTerminal)):
             raise InvalidParameterError(str(sym))
 
-    def addRule(self, nonterminal: LL1Wrapper, form: tuple[LL1Wrapper]) -> None:
+    def addRule(self, nonterminal: LL1Wrapper, form: tuple[LL1Wrapper], separator: LL1Wrapper = None) -> None:
         if nonterminal not in self.rules:
             self.rules[nonterminal] = []
-        self.rules[nonterminal].append(form)
+        if separator:
+            self.rules[nonterminal].append([form, separator])
+        else:
+            self.rules[nonterminal].append([form])
 
     def isTerminal(self, object: object) -> bool:
         return isinstance(object, Terminal)
