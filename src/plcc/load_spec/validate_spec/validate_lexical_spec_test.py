@@ -62,26 +62,39 @@ def test_pattern_cant_be_empty():
 def test_pattern_cant_be_quote_with_whitespace():
     assertInvalidPattern(" ' ")
 
-def test_multiple_name_errors():
+def test_multiple_errors_all_counted():
     validName = makeLexicalRule(name="NAME")
     invalidName = makeLexicalRule(name="name")
     duplicateName = validName
     line = makeLine("no rules here")
-    lexicalSpec = makeLexicalSpec([validName, invalidName, duplicateName, line])
+    invalidPattern = makeLexicalRule(pattern="+\"+")
+    lexicalSpec = makeLexicalSpec([validName, invalidName, duplicateName, line, invalidPattern])
     errors = validate_lexical_spec(lexicalSpec)
-    assert len(errors) == 3
+    assert len(errors) == 4
     assert errors[0] == makeInvalidNameFormatError(invalidName)
     assert errors[1] == makeDuplicateNameError(duplicateName)
     assert errors[2] == makeInvalidRuleError(line)
+    assert errors[3] == makeInvalidPatternError(invalidPattern)
 
 def makeLexicalSpec(ruleList=None):
     return LexicalSpec(ruleList)
 
-def makeLexicalRule(line='TEST', isSkip=False, name='TEST', pattern='TEST'):
-    return LexicalRule(makeLine(line), isSkip, name, pattern)
+def makeLexicalRule(name='TEST', pattern='TEST'):
+    return LexicalRule(makeLine('TEST'), False, name, pattern)
 
 def makeLine(string, lineNumber=1, file=None):
     return Line(string, lineNumber, file)
+
+def makeLexicalSpecWithOneTokenRule(name='TEST', pattern='TEST'):
+    invalidName = makeLexicalRule(name=name, pattern=pattern)
+    lexicalSpec = makeLexicalSpec([invalidName])
+    return lexicalSpec
+
+def makeLexicalSpecWithTwoTokenRules(name1, name2):
+    validName = makeLexicalRule(name=name1)
+    duplicateName = makeLexicalRule(name=name2)
+    lexicalSpec = makeLexicalSpec([validName, duplicateName])
+    return lexicalSpec
 
 def makeInvalidNameFormatError(rule):
     return InvalidNameFormatError(rule=rule)
@@ -95,25 +108,22 @@ def makeInvalidPatternError(rule):
 def makeInvalidRuleError(line):
     return InvalidRuleError(line=line)
 
-def assertInvalidName(name: str):
-    invalidName = makeLexicalRule(name=name)
-    lexicalSpec = makeLexicalSpec([invalidName])
+def assertInvalidName(givenName: str):
+    lexicalSpec = makeLexicalSpecWithOneTokenRule(name=givenName)
     errors = validate_lexical_spec(lexicalSpec)
     assert len(errors) == 1
-    assert errors[0] == makeInvalidNameFormatError(invalidName)
+    assert errors[0] == makeInvalidNameFormatError(lexicalSpec.ruleList[0])
 
-def assertValidName(name: str):
-    validName = makeLexicalRule(name=name)
-    lexicalSpec = makeLexicalSpec([validName])
+def assertValidName(givenName: str):
+    lexicalSpec = makeLexicalSpecWithOneTokenRule(name=givenName)
     errors = validate_lexical_spec(lexicalSpec)
     assert len(errors) == 0
 
-def assertInvalidPattern(pattern: str):
-    invalidPattern = makeLexicalRule(pattern=pattern)
-    lexicalSpec = makeLexicalSpec([invalidPattern])
+def assertInvalidPattern(givenPattern: str):
+    lexicalSpec = makeLexicalSpecWithOneTokenRule(pattern=givenPattern)
     errors = validate_lexical_spec(lexicalSpec)
     assert len(errors) == 1
-    assert errors[0] == makeInvalidPatternError(invalidPattern)
+    assert errors[0] == makeInvalidPatternError(lexicalSpec.ruleList[0])
 
 def assertInvalidRule(lineStr: str):
     line = makeLine(lineStr)
@@ -122,17 +132,13 @@ def assertInvalidRule(lineStr: str):
     assert len(errors) == 1
     assert errors[0] == makeInvalidRuleError(line)
 
-def assertDuplicationError(name1: str, name2: str):
-    validName = makeLexicalRule(name=name1)
-    duplicateName = makeLexicalRule(name=name2)
-    lexicalSpec = makeLexicalSpec([validName, duplicateName])
+def assertDuplicationError(givenName1: str, givenName2: str):
+    lexicalSpec = makeLexicalSpecWithTwoTokenRules(name1=givenName1, name2=givenName2)
     errors = validate_lexical_spec(lexicalSpec)
     assert len(errors) == 1
-    assert errors[0] == makeDuplicateNameError(duplicateName)
+    assert errors[0] == makeDuplicateNameError(lexicalSpec.ruleList[0])
 
-def assertNoDuplicationError(validName: str, otherValidName: str):
-    validName = makeLexicalRule(name=validName)
-    otherValidName = makeLexicalRule(name=otherValidName)
-    lexicalSpec = makeLexicalSpec([validName, otherValidName])
+def assertNoDuplicationError(givenName1: str, givenName2: str):
+    lexicalSpec = makeLexicalSpecWithTwoTokenRules(name1=givenName1, name2=givenName2)
     errors = validate_lexical_spec(lexicalSpec)
     assert len(errors) == 0
