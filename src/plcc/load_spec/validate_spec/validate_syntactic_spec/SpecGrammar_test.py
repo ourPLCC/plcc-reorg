@@ -8,6 +8,20 @@ from .LL1Wrapper import LL1Wrapper
 from .SpecGrammar import SpecGrammar
 from plcc.load_spec.parse_spec.parse_syntactic_spec.parse_syntactic_spec import parse_syntactic_spec
 
+
+def test_init():
+    syntacticSpec = parse_syntactic_spec([makeDivider()])
+    grammar = makeSpecGrammar(syntacticSpec)
+    assert grammar.getEpsilon() == grammar.getEpsilon()
+    assert grammar.getEOF() == getEOF()
+    assert len(grammar.getRules()) == 0
+    assert grammar.getStartSymbol() == None
+
+def test_process_syntactic_spec():
+    syntacticSpec = parse_syntactic_spec([makeDivider(), makeLine('<exp> ::= VAR')])
+    grammar = makeSpecGrammar(syntacticSpec)
+    assert len(grammar.getRules()) == 1
+
 def parseSyntacticSpec(lines):
     return parse_syntactic_spec(lines)
 
