@@ -4,9 +4,11 @@ class LL1Wrapper:
         self.specObject = specObject
 
     def __eq__(self, other):
-        if self.specObject is None or other.specObject is None:
-            return self is other
-        return isinstance(other, LL1Wrapper) and self.name == other.name
+        if self is other:
+            return True
+        if not isinstance(other, LL1Wrapper):
+            return False
+        return self.name == other.name
 
     def __hash__(self):
         return hash(self.name)

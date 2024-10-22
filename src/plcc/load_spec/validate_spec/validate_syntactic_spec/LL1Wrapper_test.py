@@ -51,14 +51,14 @@ def test_none_objects_eq_when_same_instance():
     otherWrapped = wrapped
     assert wrapped == otherWrapped
 
-def test_none_object_not_eq_when_diff_instance():
+def test_none_object_eq_when_diff_instance():
     wrapped = createWrappedWithNoneObject(getDefaultNonterminalName())
     otherWrapped = createWrappedWithNoneObject(getDefaultNonterminalName())
-    assert wrapped != otherWrapped
+    assert wrapped == otherWrapped
 
-def test_not_eq_object_and_none(lhsWrapped):
+def test_eq_object_and_none_same_name(lhsWrapped):
     otherWrapped = createWrappedWithNoneObject(lhsWrapped.name)
-    assert lhsWrapped != otherWrapped
+    assert lhsWrapped == otherWrapped
 
 def test_hash_nonterminal_same_name_diff_object(lhsWrapped, rhsWrapped):
     assert hash(lhsWrapped) == hash(rhsWrapped)
