@@ -60,9 +60,9 @@ class SpecGrammar(Grammar):
     def _updateNonterminalsAndTerminals(self, nonterminal: LL1Wrapper, form: tuple[LL1Wrapper]) -> None:
         self.nonterminals.add(nonterminal)
         for sym in form:
-            if self.isTerminal(sym):
+            if self.isTerminal(sym.specObject):
                 self.terminals.add(sym)
-            elif self.isNonterminal(sym):
+            elif self.isNonterminal(sym.specObject):
                 self.nonterminals.add(sym)
 
     def _updateStartSymbol(self, nonterminal: LL1Wrapper) -> None:

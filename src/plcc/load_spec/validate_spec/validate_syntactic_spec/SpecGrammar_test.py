@@ -32,6 +32,16 @@ def test_invalid_syntactic_spec_handling():
     with raises(InvalidParameterError):
         makeSpecGrammar("syntactic_spec")
 
+def test_get_nonterminals():
+    syntacticSpec = parse_syntactic_spec([makeDivider(), makeLine('<exp> ::= VAR'), makeLine('<test> ::= TERM')])
+    grammar = makeSpecGrammar(syntacticSpec)
+    assert len(grammar.getNonterminals()) == 2
+
+def test_get_terminals():
+    syntacticSpec = parse_syntactic_spec([makeDivider(), makeLine('<exp> ::= VAR'), makeLine('<test> ::= TERM')])
+    grammar = makeSpecGrammar(syntacticSpec)
+    assert len(grammar.getTerminals()) == 2
+
 def parseSyntacticSpec(lines):
     return parse_syntactic_spec(lines)
 
