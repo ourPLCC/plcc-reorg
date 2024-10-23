@@ -23,6 +23,10 @@ def test_process_syntactic_spec():
     grammar = makeSpecGrammar(syntacticSpec)
     assert len(grammar.getRules()) == 1
 
+def test_get_start_symbol_name():
+    syntacticSpec = parse_syntactic_spec([makeDivider(), makeLine('<exp> ::= VAR'), makeLine('<test> ::= TERM')])
+    grammar = makeSpecGrammar(syntacticSpec)
+    assert grammar.getStartSymbol().name == syntacticSpec[0].lhs.name
 
 def test_invalid_syntactic_spec_handling():
     with raises(InvalidParameterError):
