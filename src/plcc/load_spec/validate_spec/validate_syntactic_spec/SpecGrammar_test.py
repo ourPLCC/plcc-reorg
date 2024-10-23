@@ -7,6 +7,7 @@ from plcc.load_spec.parse_spec.parse_syntactic_spec.structs import (
 from .LL1Wrapper import LL1Wrapper
 from .SpecGrammar import SpecGrammar
 from plcc.load_spec.parse_spec.parse_syntactic_spec.parse_syntactic_spec import parse_syntactic_spec
+from .errors import InvalidParameterError
 
 
 def test_init():
@@ -21,6 +22,11 @@ def test_process_syntactic_spec():
     syntacticSpec = parse_syntactic_spec([makeDivider(), makeLine('<exp> ::= VAR')])
     grammar = makeSpecGrammar(syntacticSpec)
     assert len(grammar.getRules()) == 1
+
+
+def test_invalid_syntactic_spec_handling():
+    with raises(InvalidParameterError):
+        makeSpecGrammar("syntactic_spec")
 
 def parseSyntacticSpec(lines):
     return parse_syntactic_spec(lines)
