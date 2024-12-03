@@ -22,10 +22,23 @@ class InvalidLhsAltNameError(ValidationError):
         self.message = f"Invalid LHS alternate name format for rule: '{
             rule.line.string}' (must start with a upper-case letter, and may contain upper or lower case letters, numbers and/or underscore) on line: {rule.line.number}"
 
+@dataclass
+class InvalidRepeatingRuleSeparatorError(ValidationError):
+    def __init__(self, rule):
+        super().__init__(rule)
+        self.message = f"Invalid RHS separator symbol for rule: '{
+            rule.line.string}' (repeating rule separators must be terminals) on line: {rule.line.number}"
 
 @dataclass
 class DuplicateLhsError(ValidationError):
     def __init__(self, rule):
         super().__init__(rule)
         self.message = f"Duplicate lhs name: '{
+                rule.line.string}' on line: {rule.line.number}"
+
+@dataclass
+class DuplicateRhsSymbolError(ValidationError):
+    def __init__(self, rule):
+        super().__init__(rule)
+        self.message = f"Duplicate rhs name: '{
                 rule.line.string}' on line: {rule.line.number}"

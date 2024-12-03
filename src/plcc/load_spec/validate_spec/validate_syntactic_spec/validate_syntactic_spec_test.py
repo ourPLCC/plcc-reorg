@@ -6,15 +6,19 @@ from .validate_syntactic_spec import validate_syntactic_spec
 from ...parse_spec.parse_lexical_spec import LexicalSpec
 from ...parse_spec.parse_syntactic_spec import (
     SyntacticRule,
+    RepeatingSyntacticRule,
     SyntacticSpec,
     Symbol,
     LhsNonTerminal,
+    RhsNonTerminal,
     Terminal,
 )
 from .errors import (
     InvalidLhsNameError,
     InvalidLhsAltNameError,
+    InvalidRepeatingRuleSeparatorError,
     DuplicateLhsError,
+    DuplicateRhsSymbolError
 )
 
 
@@ -178,6 +182,117 @@ def test_duplicate_resolved_name():
     assert errors[0] == makeDuplicateLhsError(spec[1])
 
 
+def test_valid_rhs_alt_name():
+    line_1 = makeLine("<word> ::= WORD WORD")
+    line_2 = makeLine("<sentence> ::= <word>altName WORD WORD")
+    terminal = makeTerminal("WORD")
+    spec = [
+        makeSyntacticRule(
+            line_1,
+            makeLhsNonTerminal("word"),
+            [terminal, terminal]
+        ),
+        makeSyntacticRule(
+            line_2,
+            makeLhsNonTerminal("sentence"),
+            [makeRhsNonTerminal("word", "altName"), terminal, terminal]
+        )
+    ]
+    errors = validate(spec)
+    assert len(errors) == 0
+
+
+def test_duplicate_rhs_names():
+    line_1 = makeLine("<word> ::= WORD WORD")
+    line_2 = makeLine("<sentence> ::= <word>altName <word>altName WORD")
+    non_terminal = makeRhsNonTerminal("word", "altName")
+    terminal = makeTerminal("WORD")
+    spec = [
+        makeSyntacticRule(
+            line_1,
+            makeLhsNonTerminal("word"),
+            [terminal, terminal]
+        ),
+        makeSyntacticRule(
+            line_2,
+            makeLhsNonTerminal("sentence"),
+            [non_terminal, non_terminal, makeTerminal("WORD")]
+        )
+    ]
+    errors = validate(spec)
+    assert len(errors) == 1
+    assert errors[0] == makeDuplicateRhsSymbolError(spec[1])
+
+
+def test_distinct_rhs_names():
+    line_1 = makeLine("<word> ::= WORD WORD")
+    line_2 = makeLine("<sentence> ::= <word>altName <word>altName2 WORD")
+    terminal = makeTerminal("WORD")
+    spec = [
+        makeSyntacticRule(
+            line_1,
+            makeLhsNonTerminal("word"),
+            [terminal, terminal]
+        ),
+        makeSyntacticRule(
+            line_2,
+            makeLhsNonTerminal("sentence"),
+            [makeRhsNonTerminal("word", "altName"), makeRhsNonTerminal("word", "altName2"), makeTerminal("WORD")]
+        )
+    ]
+    errors = validate(spec)
+    assert len(errors) == 0
+
+def test_alt_names_and_names_are_considered_duplicate():
+    line_1 = makeLine("<word> ::= <word> <sentence>word")
+    line_2 = makeLine("<sentence> ::= WORD")
+    terminal = makeTerminal("WORD")
+    spec = [
+        makeSyntacticRule(
+            line_1,
+            makeLhsNonTerminal("word"),
+            [makeRhsNonTerminal("word"), makeRhsNonTerminal("sentence", "word")]
+        ),
+        makeSyntacticRule(
+            line_2,
+            makeLhsNonTerminal("sentence"),
+            [terminal]
+        )
+    ]
+    errors = validate(spec)
+    assert len(errors) == 1
+    assert errors[0] == makeDuplicateRhsSymbolError(spec[1])
+
+def test_invalid_non_terminal_separator():
+    line_1 = makeLine("<noun> **= WORD WORD +<sentence> WORD")
+    line_2 = makeLine("<sentence> ::= WORD")
+    terminal = makeTerminal("WORD")
+    spec = [
+        makeRepeatingSyntacticRule(
+            line_1,
+            makeLhsNonTerminal("noun"),
+            [terminal, terminal],
+            separator=makeRhsNonTerminal("sentence")
+        ),
+        makeSyntacticRule(
+            line_2,
+            makeLhsNonTerminal("sentence"),
+            [terminal]
+        )
+    ]
+    errors = validate(spec)
+    assert len(errors) == 1
+    assert errors[0] == makeInvalidRepeatingRuleSeparatorError(spec[1])
+
+
+def makeRepeatingSyntacticRule(
+    line: Line,
+    lhs: LhsNonTerminal,
+    rhsSymbolList: List[Symbol],
+    separator: Terminal | None = None,
+):
+    return RepeatingSyntacticRule(line, lhs, rhsSymbolList, separator)
+
 def validate(syntacticSpec: SyntacticSpec, lexicalSpec: LexicalSpec = []):
     return validate_syntactic_spec(syntacticSpec, lexicalSpec)
 
@@ -197,6 +312,14 @@ def makeLine(string, lineNumber=1, file=None):
 def makeLhsNonTerminal(name: str | None, altName: str | None = None):
     return LhsNonTerminal(name, altName)
 
+def makeRhsNonTerminal(name: str | None, altName: str | None = None):
+    return RhsNonTerminal(name, altName)
+
+def makeDuplicateRhsSymbolError(rule):
+    return DuplicateRhsSymbolError(rule)
+
+def makeInvalidRepeatingRuleSeparatorError(rule):
+    return InvalidRepeatingRuleSeparatorError(rule)
 
 def makeTerminal(name: str | None):
     return Terminal(name)

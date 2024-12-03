@@ -10,7 +10,9 @@ from .errors import (
     ValidationError,
     InvalidLhsNameError,
     InvalidLhsAltNameError,
+    InvalidRepeatingRuleSeparatorError,
     DuplicateLhsError,
+    DuplicateRhsSymbolError
 )
 from ...load_rough_spec.parse_lines import Line, parse_lines
 from ...load_rough_spec.parse_includes import Include, parse_includes
