@@ -52,7 +52,7 @@ class SyntacticRhsValidator:
         resolvedNames.append(resolvedName)
 
     def _getResolvedName(self, symbol) -> str:
-        return symbol.altName if symbol.altName else symbol.name #TODO was .captialize() at end
+        return symbol.altName if symbol.altName else symbol.name
 
     def _isRepeatingRule(self):
         return True if isinstance(self.rule, RepeatingSyntacticRule) else False

@@ -263,7 +263,21 @@ def test_alt_names_and_names_are_considered_duplicate():
     assert len(errors) == 1
     assert errors[0] == makeDuplicateRhsSymbolError(spec[1])
 
-def test_invalid_non_terminal_separator():
+def test_valid_separator():
+    line = makeLine("<noun> **= WORD WORD +WORD")
+    terminal = makeTerminal("WORD")
+    spec = [
+        makeRepeatingSyntacticRule(
+            line,
+            makeLhsNonTerminal("noun"),
+            [terminal, terminal],
+            separator=makeTerminal("WORD")
+        )
+    ]
+    errors = validate(spec)
+    assert len(errors) == 0
+
+def test_invalid_rhs_non_terminal_separator():
     line_1 = makeLine("<noun> **= WORD WORD +<sentence> WORD")
     line_2 = makeLine("<sentence> ::= WORD")
     terminal = makeTerminal("WORD")
@@ -284,30 +298,17 @@ def test_invalid_non_terminal_separator():
     assert len(errors) == 1
     assert errors[0] == makeInvalidRepeatingRuleSeparatorError(spec[1])
 
-
-def makeRepeatingSyntacticRule(
-    line: Line,
-    lhs: LhsNonTerminal,
-    rhsSymbolList: List[Symbol],
-    separator: Terminal | None = None,
-):
-    return RepeatingSyntacticRule(line, lhs, rhsSymbolList, separator)
-
 def validate(syntacticSpec: SyntacticSpec, lexicalSpec: LexicalSpec = []):
     return validate_syntactic_spec(syntacticSpec, lexicalSpec)
-
 
 def makeSyntacticSpec(ruleList=None):
     return SyntacticSpec(ruleList)
 
-
 def makeSyntacticRule(line: Line, lhs: LhsNonTerminal, rhsList: List[Symbol]):
     return SyntacticRule(line, lhs, rhsList)
 
-
 def makeLine(string, lineNumber=1, file=None):
     return Line(string, lineNumber, file)
-
 
 def makeLhsNonTerminal(name: str | None, altName: str | None = None):
     return LhsNonTerminal(name, altName)
@@ -324,14 +325,19 @@ def makeInvalidRepeatingRuleSeparatorError(rule):
 def makeTerminal(name: str | None):
     return Terminal(name)
 
-
 def makeInvalidLhsNameFormatError(rule):
     return InvalidLhsNameError(rule)
-
 
 def makeInvalidLhsAltNameFormatError(rule):
     return InvalidLhsAltNameError(rule)
 
-
 def makeDuplicateLhsError(rule):
     return DuplicateLhsError(rule)
+
+def makeRepeatingSyntacticRule(
+    line: Line,
+    lhs: LhsNonTerminal,
+    rhsSymbolList: List[Symbol],
+    separator: Terminal | None = None,
+):
+    return RepeatingSyntacticRule(line, lhs, rhsSymbolList, separator)
