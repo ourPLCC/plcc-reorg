@@ -20,6 +20,7 @@ class SyntacticLhsValidator:
     def __init__(self, syntacticSpec: SyntacticSpec):
         self.spec = syntacticSpec
         self.errorList = []
+        self.resolvedNonTerminals = set()
         self.nonTerminals = set()
 
     def validate(self) -> tuple[list[ValidationError], set[str]]:
@@ -52,9 +53,9 @@ class SyntacticLhsValidator:
 
     def _checkDuplicates(self):
         name = self._getResolvedName()
-        if name in self.nonTerminals:
+        if name in self.resolvedNonTerminals:
             self._appendDuplicateLhsError()
-        self.nonTerminals.add(name)
+        self.resolvedNonTerminals.add(name)
 
     def _appendInvalidLhsNameError(self):
         self.errorList.append(InvalidLhsNameError(self.rule))
