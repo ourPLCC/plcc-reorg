@@ -1,7 +1,7 @@
 from ...parse_spec.parse_lexical_spec import LexicalSpec
 from ...parse_spec.parse_syntactic_spec import SyntacticSpec, RhsNonTerminal, Terminal
 
-from .errors import ValidationError, InvalidRhsNameError, InvalidRhsAltNameError, InvalidRhsTerminalError
+from .errors import ValidationError, InvalidRhsNameError, InvalidRhsAltNameError, InvalidRhsTerminalError, MissingNonTerminalError
 import re
 
 
@@ -43,6 +43,11 @@ class SyntacticRhsValidator:
             self._validateNonTerminalAltName(s.altName, rule)
         if not re.match(r"^[a-z][a-zA-Z0-9_]+$", s.name):
             self._appendInvalidRhsError(rule)
+        if not self._nonTerminalExists(s):
+            self._appendMissingNonTerminalError(rule)
+
+    def _nonTerminalExists(self, non_terminal):
+        return non_terminal in self.nonTerminals
 
     def _validateNonTerminalAltName(self, alt_name: str, rule):
         if not re.match(r"^[a-z][a-zA-Z0-9_]+$", alt_name):
