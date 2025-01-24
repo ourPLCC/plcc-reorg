@@ -35,6 +35,7 @@ class SyntacticLhsValidator:
         if alt_name:
             self._checkAltName(alt_name)
         self._checkDuplicates()
+        self._appendNonTerminal()
 
     def _getNames(self) -> tuple[str, str]:
         return (self.rule.lhs.name, self.rule.lhs.altName)
@@ -56,6 +57,9 @@ class SyntacticLhsValidator:
         if name in self.resolvedNonTerminals:
             self._appendDuplicateLhsError()
         self.resolvedNonTerminals.add(name)
+
+    def _appendNonTerminal(self):
+        self.nonTerminals.add(self.rule.lhs.name)
 
     def _appendInvalidLhsNameError(self):
         self.errorList.append(InvalidLhsNameError(self.rule))
