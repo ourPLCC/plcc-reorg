@@ -5,6 +5,7 @@ from ...parse_spec.parse_syntactic_spec import (
 from ...parse_spec.parse_lexical_spec import LexicalSpec
 from .validate_lhs import validate_lhs
 from .validate_rhs import validate_rhs
+from .validate_terminals import validate_terminals
 
 
 def validate_syntactic_spec(syntacticSpec: SyntacticSpec, lexicalSpec: LexicalSpec):
@@ -27,6 +28,7 @@ class SyntacticValidator:
             return self.errorList
         self._validateLhs()
         self._validateRhs()
+        self.errorList.extend(validate_terminals(self.syntacticSpec, self.lexicalSpec))
         return self.errorList
 
     def _validateLhs(self):
