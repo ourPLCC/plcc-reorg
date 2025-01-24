@@ -56,3 +56,6 @@ class SyntacticRhsValidator:
 
     def _appendInvalidRhsTerminalError(self, rule):
         self.errorList.append(InvalidRhsTerminalError(rule))
+
+    def _appendMissingNonTerminalError(self, rule):
+        self.errorList.append(MissingNonTerminalError(rule))

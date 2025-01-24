@@ -19,6 +19,7 @@ from .errors import (
     InvalidRhsAltNameError,
     InvalidRhsTerminalError,
     DuplicateLhsError,
+    MissingNonTerminalError,
 )
 
 
@@ -282,3 +283,6 @@ def makeDuplicateLhsError(rule):
 
 def makeInvalidRhsTerminalFormatError(rule):
     return InvalidRhsTerminalError(rule)
+
+def makeMissingNonTerminalError(rule):
+    return MissingNonTerminalError(rule)

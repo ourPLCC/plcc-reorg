@@ -7,6 +7,7 @@ from .errors import (
     InvalidLhsAltNameError,
     DuplicateLhsError,
     ValidationError,
+    MissingNonTerminalError,
 )
 
 
