@@ -145,8 +145,14 @@ def test_uppercase_rhs_alt_name():
 
 
 def test_valid_rhs_alt_name():
+    setup_line = makeLine("<word> ::= WORD")
     invalid_alt_name = makeLine("<sentence> ::= <word>:name")
     Name1 = [
+        makeSyntacticRule(
+            setup_line,
+            makeLhsNonTerminal("word"),
+            [makeTerminal("WORD")],
+        ),
         makeSyntacticRule(
             invalid_alt_name,
             makeLhsNonTerminal("sentence"),
