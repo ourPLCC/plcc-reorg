@@ -51,3 +51,10 @@ class InvalidRhsTerminalError(ValidationError):
         self.message = f"Invalid RHS alternate name format for rule: '{
             rule.line.string}' (upper-case letters, numbers, and underscore and cannot start with a number. on line: {rule.line.number}"
 
+@dataclass
+class InvalidRhsSeparatorTypeError(ValidationError):
+    def __init__(self, rule):
+        super().__init__(rule)
+        self.message = f"Invalid RHS separator, must be terminal: '{
+            rule.line.string}' "
+

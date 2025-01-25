@@ -1,7 +1,7 @@
 from ...parse_spec.parse_lexical_spec import LexicalSpec
-from ...parse_spec.parse_syntactic_spec import SyntacticSpec, RhsNonTerminal, Terminal
+from ...parse_spec.parse_syntactic_spec import SyntacticSpec, RhsNonTerminal, Terminal, RepeatingSyntacticRule
 
-from .errors import ValidationError, InvalidRhsNameError, InvalidRhsAltNameError, InvalidRhsTerminalError
+from .errors import ValidationError, InvalidRhsNameError, InvalidRhsAltNameError, InvalidRhsTerminalError, InvalidRhsSeparatorTypeError
 import re
 
 
@@ -27,6 +27,9 @@ class SyntacticRhsValidator:
 
     def validate(self):
         for rule in self.syntacticSpec:
+            if isinstance(rule, RepeatingSyntacticRule):
+                self._validateSeparatorIsTerminal(rule)
+
             for s in rule.rhsSymbolList:
                 if isinstance(s, RhsNonTerminal):
                     self._validateNonTerminal(s, rule)
@@ -44,9 +47,16 @@ class SyntacticRhsValidator:
         if not re.match(r"^[a-z][a-zA-Z0-9_]+$", s.name):
             self._appendInvalidRhsError(rule)
 
+    def _validateSeparatorIsTerminal(self, rule):
+        if isinstance(rule.separator, Terminal):
+            self._appendInvalidRhsSeparatorTypeError(rule)
+
     def _validateNonTerminalAltName(self, alt_name: str, rule):
         if not re.match(r"^[a-z][a-zA-Z0-9_]+$", alt_name):
             self._appendInvalidRhsAltNameError(rule)
+
+    def _appendInvalidRhsSeparatorTypeError(self, rule):
+        self.errorList.append(InvalidRhsSeparatorTypeError(rule))
 
     def _appendInvalidRhsError(self, rule):
         self.errorList.append(InvalidRhsNameError(rule))
