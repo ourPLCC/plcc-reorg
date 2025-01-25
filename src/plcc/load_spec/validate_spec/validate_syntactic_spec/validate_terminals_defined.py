@@ -3,10 +3,10 @@ from .errors import UndefinedTerminalError
 from ...parse_spec.parse_syntactic_spec import SyntacticSpec
 from ...parse_spec.parse_lexical_spec import LexicalSpec
 
-def validate_terminals_are_defined(syntacticSpec: SyntacticSpec, lexicalSpec: LexicalSpec):
-    return TerminalsAreDefinedValidator(syntacticSpec, lexicalSpec).validate()
+def validate_terminals_defined(syntacticSpec: SyntacticSpec, lexicalSpec: LexicalSpec):
+    return TerminalsDefinedValidator(syntacticSpec, lexicalSpec).validate()
 
-class TerminalsAreDefinedValidator:
+class TerminalsDefinedValidator:
     def __init__(self, syntacticSpec: SyntacticSpec, lexicalSpec: LexicalSpec):
         self.syntacticSpec = syntacticSpec
         self.lexicalSpec = lexicalSpec
@@ -15,10 +15,10 @@ class TerminalsAreDefinedValidator:
 
     def validate(self):
         for rule in self.syntacticSpec:
-            self._validateTerminalsAreDefined(rule)
+            self._validateTerminalsDefined(rule)
         return self.errorList
 
-    def _validateTerminalsAreDefined(self, rule):
+    def _validateTerminalsDefined(self, rule):
         for sym in rule.rhsSymbolList:
             if self._isTerminal(sym) and self._isUndefined(sym):
                 self.errorList.append(UndefinedTerminalError(rule))

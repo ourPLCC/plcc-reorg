@@ -13,7 +13,7 @@ from ...parse_spec.parse_syntactic_spec import (
 )
 
 # System under test
-from .validate_terminals_are_defined import validate_terminals_are_defined
+from .validate_terminals_defined import validate_terminals_defined
 from .errors import UndefinedTerminalError
 
 
@@ -153,7 +153,7 @@ def makeLexicalRule(name='TEST', pattern='TEST'):
     return LexicalRule(makeLine('TEST'), False, name, pattern)
 
 def validateTerms(syntacticSpec: SyntacticSpec, lexicalSpec: LexicalSpec = []):
-    return validate_terminals_are_defined(syntacticSpec, lexicalSpec)
+    return validate_terminals_defined(syntacticSpec, lexicalSpec)
 
 def makeSyntacticSpec(ruleList=None):
     return SyntacticSpec(ruleList)
