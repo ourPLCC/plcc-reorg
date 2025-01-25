@@ -258,15 +258,6 @@ def test_invalid_Rhs_error():
     assert len(errors) == 1
     assert errors[0] == makeInvalidRhsNameFormatError(spec[1])
 
-def test_undefined_terminal_error():
-    spec = [
-            makeSyntacticRule(
-                makeLine("<sentence> ::= WORD"), makeLhsNonTerminal("sentence"), [makeTerminal("WORD")]
-            )
-        ]
-    errors = validate(spec)
-    assert len(errors) == 1
-    assert errors[0] == makeUndefinedTerminalError(spec[0])
 
 def validate(syntacticSpec: SyntacticSpec, lexicalSpec: LexicalSpec = []):
     return validate_syntactic_spec(syntacticSpec, lexicalSpec)

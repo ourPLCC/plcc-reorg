@@ -30,6 +30,21 @@ def test_undefined_terminal_error():
     assert len(errors) == 1
     assert isinstance(errors[0], UndefinedTerminalError)
 
+
+def test_no_lexical_spec_undefined_error():
+    lexicalSpec = None
+    syntacticSpec = makeSyntacticSpec([
+        makeSyntacticRule(
+            makeLine("<sentence> ::= THIS"),
+            makeLhsNonTerminal("sentence"),
+            [makeTerminal("THIS")]
+        )
+    ])
+    errors = validateTerms(syntacticSpec, lexicalSpec)
+    assert len(errors) == 1
+    assert isinstance(errors[0], UndefinedTerminalError)
+
+
 def test_valid_defined_terminal():
     this = makeLexicalRule(name="THIS", pattern="THIS")
     lexicalSpec = makeLexicalSpec([this])
