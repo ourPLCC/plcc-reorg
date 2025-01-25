@@ -245,6 +245,17 @@ def test_invalid_rhs_error():
     assert len(errors) > 0
     assert errors.__contains__(makeInvalidRhsNameFormatError(spec[1]))
 
+def test_missing_non_terminal_error():
+    line_with_missing_non_terminal = makeSyntacticRule(
+        makeLine("<name> ::= <verb>"),
+        makeLhsNonTerminal("name"),
+        [makeRhsNonTerminal("verb")],
+    )
+    spec = [line_with_missing_non_terminal]
+    errors = validate(spec)
+    assert len(errors) == 1
+    assert errors[0] == makeMissingNonTerminalError(spec[0])
+
 
 def validate(syntacticSpec: SyntacticSpec, lexicalSpec: LexicalSpec = []):
     return validate_syntactic_spec(syntacticSpec, lexicalSpec)
@@ -293,8 +304,10 @@ def makeInvalidRhsAltNameFormatError(rule):
 def makeDuplicateLhsError(rule):
     return DuplicateLhsError(rule)
 
+
 def makeInvalidRhsTerminalFormatError(rule):
     return InvalidRhsTerminalError(rule)
+
 
 def makeMissingNonTerminalError(rule):
     return MissingNonTerminalError(rule)
