@@ -48,7 +48,7 @@ class SyntacticRhsValidator:
             self._appendInvalidRhsError(rule)
 
     def _validateSeparatorIsTerminal(self, rule):
-        if isinstance(rule.separator, Terminal):
+        if not isinstance(rule.separator, Terminal):
             self._appendInvalidRhsSeparatorTypeError(rule)
 
     def _validateNonTerminalAltName(self, alt_name: str, rule):

@@ -11,6 +11,8 @@ from ...parse_spec.parse_syntactic_spec import (
     LhsNonTerminal,
     Terminal,
     RhsNonTerminal,
+    RepeatingSyntacticRule,
+    CapturingTerminal
 )
 from .errors import (
     InvalidLhsNameError,
@@ -18,6 +20,7 @@ from .errors import (
     InvalidLhsAltNameError,
     InvalidRhsAltNameError,
     InvalidRhsTerminalError,
+    InvalidRhsSeparatorTypeError,
     DuplicateLhsError,
 )
 
@@ -232,6 +235,36 @@ def test_invalid_Rhs_error():
     assert len(errors) == 1
     assert errors[0] == makeInvalidRhsNameFormatError(spec[1])
 
+def test_invalid_no_separator():
+    rule = makeRepeatingSyntacticRule(
+        "sentence",
+        [makeTerminal("VERB")],
+    )
+    spec = [rule]
+    errors = validate(spec)
+    assert len(errors) == 1
+    assert errors[0] == makeInvalidRhsSeparatorTypeError(spec[0])
+
+def test_invalid_separator_not_terminal():
+    rule = makeRepeatingSyntacticRule(
+        "sentence",
+        [makeTerminal("VERB")],
+        separator=makeRhsNonTerminal("SEP")
+    )
+    spec = [rule]
+    errors = validate(spec)
+    assert len(errors) == 1
+    assert errors[0] == makeInvalidRhsSeparatorTypeError(spec[0])
+
+def test_valid_separator_terminal():
+    rule = makeRepeatingSyntacticRule(
+        "sentence",
+        [makeTerminal("VERB")],
+        separator=makeTerminal("SEP")
+    )
+    spec = [rule]
+    errors = validate(spec)
+    assert len(errors) == 0
 
 def validate(syntacticSpec: SyntacticSpec, lexicalSpec: LexicalSpec = []):
     return validate_syntactic_spec(syntacticSpec, lexicalSpec)
@@ -260,6 +293,27 @@ def makeRhsNonTerminal(name: str | None, altName: str | None = None):
 def makeTerminal(name: str | None):
     return Terminal(name)
 
+def makeRepeatingSyntacticRule(lhs: str, rhsList: List[Symbol], separator=None):
+    return RepeatingSyntacticRule(
+        buildLineRepeating(lhs, rhsList, separator),
+        makeLhsNonTerminal(lhs),
+        rhsList,
+        separator,
+    )
+
+def buildLineRepeating(lhs, rhs, sep=None):
+    if sep:
+        return makeLine(f"{lhs} **={buildRhs(rhs)} +{sep.name}")
+    return makeLine(f"{lhs} **={buildRhs(rhs)}")
+
+def buildRhs(rhs):
+    s = ""
+    for symbol in rhs:
+        if isinstance(symbol, RhsNonTerminal) or isinstance(symbol, CapturingTerminal):
+            s += stringifyCapturing(symbol)
+            break
+        s += " " + symbol.name
+    return s
 
 def makeInvalidLhsNameFormatError(rule):
     return InvalidLhsNameError(rule)
@@ -282,3 +336,6 @@ def makeDuplicateLhsError(rule):
 
 def makeInvalidRhsTerminalFormatError(rule):
     return InvalidRhsTerminalError(rule)
+
+def makeInvalidRhsSeparatorTypeError(rule):
+    return InvalidRhsSeparatorTypeError(rule)
