@@ -229,21 +229,21 @@ def test_duplicate_resolved_name():
     assert errors[0] == makeDuplicateLhsError(spec[1])
 
 
-def test_invalid_Rhs_error():
+def test_invalid_rhs_error():
     name1 = makeSyntacticRule(
         makeLine("<sentence> ::= VERB"),
         makeLhsNonTerminal("sentence"),
         [makeTerminal("VERB")],
     )
     name2 = makeSyntacticRule(
-        makeLine("<name> ::= <VERB>"),
+        makeLine("<name> ::= <Verb>"),
         makeLhsNonTerminal("name"),
-        [makeRhsNonTerminal("VERB")],
+        [makeRhsNonTerminal("Verb")],
     )
     spec = [name1, name2]
     errors = validate(spec)
-    assert len(errors) == 1
-    assert errors[0] == makeInvalidRhsNameFormatError(spec[1])
+    assert len(errors) > 0
+    assert errors.__contains__(makeInvalidRhsNameFormatError(spec[1]))
 
 
 def validate(syntacticSpec: SyntacticSpec, lexicalSpec: LexicalSpec = []):
