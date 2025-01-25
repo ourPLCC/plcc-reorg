@@ -1,6 +1,7 @@
 from typing import List
+
+# Dependencies
 from ...load_rough_spec.parse_lines import Line
-from .validate_terminals import validate_terminals
 from ...parse_spec.parse_lexical_spec import LexicalRule, LexicalSpec
 from ...parse_spec.parse_syntactic_spec import (
     SyntacticRule,
@@ -11,27 +12,34 @@ from ...parse_spec.parse_syntactic_spec import (
     CapturingTerminal
 )
 
+# System under test
+from .validate_terminals_are_defined import validate_terminals_are_defined
+from .errors import UndefinedTerminalError
+
 
 def test_undefined_terminal_error():
     lexicalSpec = makeLexicalSpec([])
     syntacticSpec = makeSyntacticSpec([
         makeSyntacticRule(
-        makeLine("<sentence> ::= THIS"),
-        makeLhsNonTerminal("sentence"),
-        [makeTerminal("THIS")]
-    )])
+            makeLine("<sentence> ::= THIS"),
+            makeLhsNonTerminal("sentence"),
+            [makeTerminal("THIS")]
+        )
+    ])
     errors = validateTerms(syntacticSpec, lexicalSpec)
     assert len(errors) == 1
+    assert isinstance(errors[0], UndefinedTerminalError)
 
 def test_valid_defined_terminal():
     this = makeLexicalRule(name="THIS", pattern="THIS")
     lexicalSpec = makeLexicalSpec([this])
     syntacticSpec = makeSyntacticSpec([
         makeSyntacticRule(
-        makeLine("<sentence> ::= THIS"),
-        makeLhsNonTerminal("sentence"),
-        [makeTerminal("THIS")]
-    )])
+            makeLine("<sentence> ::= THIS"),
+            makeLhsNonTerminal("sentence"),
+            [makeTerminal("THIS")]
+        )
+    ])
     errors = validateTerms(syntacticSpec, lexicalSpec)
     assert len(errors) == 0
 
@@ -39,12 +47,15 @@ def test_multiple_undefined_terminals_error():
     lexicalSpec = makeLexicalSpec([])
     syntacticSpec = makeSyntacticSpec([
         makeSyntacticRule(
-        makeLine("<sentence> ::= THIS FIRST SECOND"),
-        makeLhsNonTerminal("sentence"),
-        [makeTerminal("THIS"), makeTerminal("FIRST"), makeTerminal("SECOND")]
-    )])
+            makeLine("<sentence> ::= THIS FIRST SECOND"),
+            makeLhsNonTerminal("sentence"),
+            [makeTerminal("THIS"), makeTerminal("FIRST"), makeTerminal("SECOND")]
+        )
+    ])
     errors = validateTerms(syntacticSpec, lexicalSpec)
     assert len(errors) == 3
+    for e in errors:
+        assert isinstance(e, UndefinedTerminalError)
 
 def test_multiple_valid_defined_terminals():
     this = makeLexicalRule(name="THIS", pattern="THIS")
@@ -53,10 +64,11 @@ def test_multiple_valid_defined_terminals():
     lexicalSpec = makeLexicalSpec([this, first, second])
     syntacticSpec = makeSyntacticSpec([
         makeSyntacticRule(
-        makeLine("<sentence> ::= THIS FIRST SECOND"),
-        makeLhsNonTerminal("sentence"),
-        [makeTerminal("THIS"), makeTerminal("FIRST"), makeTerminal("SECOND")]
-    )])
+            makeLine("<sentence> ::= THIS FIRST SECOND"),
+            makeLhsNonTerminal("sentence"),
+            [makeTerminal("THIS"), makeTerminal("FIRST"), makeTerminal("SECOND")]
+        )
+    ])
     errors = validateTerms(syntacticSpec, lexicalSpec)
     assert len(errors) == 0
 
@@ -66,10 +78,11 @@ def test_undefined_terminal_with_defined_terminal_error():
     lexicalSpec = makeLexicalSpec([this, first])
     syntacticSpec = makeSyntacticSpec([
         makeSyntacticRule(
-        makeLine("<sentence> ::= THIS FIRST SECOND"),
-        makeLhsNonTerminal("sentence"),
-        [makeTerminal("THIS"), makeTerminal("FIRST"), makeTerminal("SECOND")]
-    )])
+            makeLine("<sentence> ::= THIS FIRST SECOND"),
+            makeLhsNonTerminal("sentence"),
+            [makeTerminal("THIS"), makeTerminal("FIRST"), makeTerminal("SECOND")]
+        )
+    ])
     errors = validateTerms(syntacticSpec, lexicalSpec)
     assert len(errors) == 1
 
@@ -78,10 +91,11 @@ def test_valid_defined_captured_terminal():
     lexicalSpec = makeLexicalSpec([first])
     syntacticSpec = makeSyntacticSpec([
         makeSyntacticRule(
-        makeLine("<sentence> ::= <FIRST>"),
-        makeLhsNonTerminal("sentence"),
-        [makeCapturingTerminal("FIRST")]
-    )])
+            makeLine("<sentence> ::= <FIRST>"),
+            makeLhsNonTerminal("sentence"),
+            [makeCapturingTerminal("FIRST")]
+        )
+    ])
     errors = validateTerms(syntacticSpec, lexicalSpec)
     assert len(errors) == 0
 
@@ -89,27 +103,33 @@ def test_undefined_captured_terminal_error():
     lexicalSpec = makeLexicalSpec([])
     syntacticSpec = makeSyntacticSpec([
         makeSyntacticRule(
-        makeLine("<sentence> ::= <FIRST>"),
-        makeLhsNonTerminal("sentence"),
-        [makeCapturingTerminal("FIRST")]
-    )])
+            makeLine("<sentence> ::= <FIRST>"),
+            makeLhsNonTerminal("sentence"),
+            [makeCapturingTerminal("FIRST")]
+        )
+    ])
     errors = validateTerms(syntacticSpec, lexicalSpec)
     assert len(errors) == 1
+    assert isinstance(errors[0], UndefinedTerminalError)
 
 def test_multiple_undefined_captured_terminals_with_different_rules_error():
     lexicalSpec = makeLexicalSpec([])
     syntacticSpec = makeSyntacticSpec([
         makeSyntacticRule(
-        makeLine("<sentence> ::= <FIRST>"),
-        makeLhsNonTerminal("sentence"),
-        [makeCapturingTerminal("FIRST")]
-    ), makeSyntacticRule(
-        makeLine("<two> ::= <SECOND>"),
-        makeLhsNonTerminal("two"),
-        [makeCapturingTerminal("SECOND")]
-    )])
+            makeLine("<sentence> ::= <FIRST>"),
+            makeLhsNonTerminal("sentence"),
+            [makeCapturingTerminal("FIRST")]
+        ),
+        makeSyntacticRule(
+            makeLine("<two> ::= <SECOND>"),
+            makeLhsNonTerminal("two"),
+            [makeCapturingTerminal("SECOND")]
+        )
+    ])
     errors = validateTerms(syntacticSpec, lexicalSpec)
     assert len(errors) == 2
+    for e in errors:
+        assert isinstance(e, UndefinedTerminalError)
 
 def test_valid_defined_and_captured_terminals():
     first = makeLexicalRule(name="FIRST", pattern="FIRST")
@@ -118,10 +138,11 @@ def test_valid_defined_and_captured_terminals():
     lexicalSpec = makeLexicalSpec([first, second, third])
     syntacticSpec = makeSyntacticSpec([
         makeSyntacticRule(
-        makeLine("<sentence> ::= <FIRST> SECOND THIRD"),
-        makeLhsNonTerminal("sentence"),
-        [makeCapturingTerminal("FIRST"), makeTerminal("SECOND"), makeTerminal("THIRD")]
-    )])
+            makeLine("<sentence> ::= <FIRST> SECOND THIRD"),
+            makeLhsNonTerminal("sentence"),
+            [makeCapturingTerminal("FIRST"), makeTerminal("SECOND"), makeTerminal("THIRD")]
+        )
+    ])
     errors = validateTerms(syntacticSpec, lexicalSpec)
     assert len(errors) == 0
 
@@ -132,7 +153,7 @@ def makeLexicalRule(name='TEST', pattern='TEST'):
     return LexicalRule(makeLine('TEST'), False, name, pattern)
 
 def validateTerms(syntacticSpec: SyntacticSpec, lexicalSpec: LexicalSpec = []):
-    return validate_terminals(syntacticSpec, lexicalSpec)
+    return validate_terminals_are_defined(syntacticSpec, lexicalSpec)
 
 def makeSyntacticSpec(ruleList=None):
     return SyntacticSpec(ruleList)
