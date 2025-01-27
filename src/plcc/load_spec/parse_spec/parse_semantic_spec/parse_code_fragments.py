@@ -26,7 +26,7 @@ class CodeFragmentParser:
             self._parse_line_or_block(obj)
 
         if self.targetLocator != None:
-            raise CodeFragmentMissingBlockError(self.targetLocator.line)
+            self._parse_with_undefined_block()
 
         return self.codeFragmentList
 
@@ -38,11 +38,7 @@ class CodeFragmentParser:
 
         handler(obj)
 
-
     def _parse_block(self, block):
-        if self.targetLocator == None:
-            raise UndefinedTargetLocatorError(block.lines[0])
-
         self.codeFragmentList.append(CodeFragment(targetLocator=self.targetLocator, block=block))
         self.targetLocator = None
 
@@ -51,23 +47,12 @@ class CodeFragmentParser:
                 return
 
         if self.targetLocator != None:
-            raise DuplicateTargetLocatorError(line.string)
-        else:
-            self.targetLocator = parse_target_locator(line, self.targetLocator_regex)
+            self._parse_with_undefined_block()
+        self.targetLocator = parse_target_locator(line, self.targetLocator_regex)
 
+    def _parse_with_undefined_block(self):
+        self.codeFragmentList.append(CodeFragment(targetLocator=self.targetLocator, block=None))
 
     def _isCommentOrBlank(self, obj_str):
         return True if re.match(r'\s*#', obj_str) or re.match(r'\s*$', obj_str) else False
 
-
-class CodeFragmentMissingBlockError(Exception):
-    def __init__(self, line):
-        self.line = line
-
-class UndefinedTargetLocatorError(Exception):
-    def __init__(self, line):
-        self.line = line
-
-class DuplicateTargetLocatorError(Exception):
-    def __init__(self, line):
-        self.line = line
