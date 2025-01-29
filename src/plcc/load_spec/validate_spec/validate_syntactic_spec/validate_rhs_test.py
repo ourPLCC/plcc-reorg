@@ -87,7 +87,7 @@ def test_invalid_separator_not_terminal():
     rule = makeRepeatingSyntacticRule(
         "sentence",
         [makeTerminal("VERB")],
-        separator=makeRhsNonTerminal("SEP")
+        separator=makeRhsNonTerminal("sep")
     )
     spec = [rule]
     errors = validate(spec)
@@ -120,9 +120,6 @@ def buildLineRepeating(lhs, rhs, sep=None):
 def buildRhs(rhs):
     s = ""
     for symbol in rhs:
-        if isinstance(symbol, RhsNonTerminal) or isinstance(symbol, CapturingTerminal):
-            s += stringifyCapturing(symbol)
-            break
         s += " " + symbol.name
     return s
 
