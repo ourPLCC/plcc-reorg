@@ -19,11 +19,12 @@ class CodeFragmentParser:
     def parse(self):
         for obj in self.linesAndBlocks:
             self._parseLineOrBlock(obj)
+
             if self._isCurrentCodeFragmentAttributesDefined():
                 self._addCurrentCodeFragmentToList()
                 self._resetCurrentCodeFragment()
 
-        if self._isCurrentCodeFragmentTargetLocatorDefined() or self._isCurrentCodeFragmentBlockDefined():
+        if self._isCurrentCodeFragmentTargetLocatorOrBlockDefined():
             self._addCurrentCodeFragmentToList()
 
         return self.codeFragmentList
@@ -39,6 +40,7 @@ class CodeFragmentParser:
     def _parseLine(self, line):
         if self._isCommentOrBlank(line.string):
             return
+
         if self._isCurrentCodeFragmentTargetLocatorDefined():
             self._addCurrentCodeFragmentToList()
             self._resetCurrentCodeFragment()
@@ -47,10 +49,6 @@ class CodeFragmentParser:
         self._setCurrentCodeFragmentTargetLocator(targetLocator)
 
     def _parseBlock(self, block):
-        if not self._isCurrentCodeFragmentTargetLocatorDefined() and self._isCurrentCodeFragmentBlockDefined():
-            self._addCurrentCodeFragmentToList()
-            self._resetCurrentCodeFragment()
-
         self.currentCodeFragment.block = block
 
         if not self._isCurrentCodeFragmentTargetLocatorDefined():
@@ -68,6 +66,9 @@ class CodeFragmentParser:
 
     def _isCurrentCodeFragmentTargetLocatorDefined(self):
         return True if self.currentCodeFragment.targetLocator != None else False
+
+    def _isCurrentCodeFragmentTargetLocatorOrBlockDefined(self):
+        return True if self._isCurrentCodeFragmentTargetLocatorDefined() or self._isCurrentCodeFragmentBlockDefined() else False
 
     def _isCurrentCodeFragmentBlockDefined(self):
         return True if self.currentCodeFragment.block != None else False
