@@ -1,14 +1,10 @@
-from dataclasses import dataclass
-from .parse_target_locator import TargetLocator, parse_target_locator
-from plcc.load_spec.load_rough_spec.parse_lines import Line
-from plcc.load_spec.load_rough_spec.parse_blocks import Block
-from plcc.load_spec.load_rough_spec.parse_dividers import Divider
-import re
 
-@dataclass
-class CodeFragment:
-    targetLocator: TargetLocator
-    block: Block
+from plcc.load_spec.structs import CodeFragment
+from .parse_target_locator import parse_target_locator
+from plcc.load_spec.structs import Line
+from plcc.load_spec.structs import Block
+from plcc.load_spec.structs import Divider
+import re
 
 def parse_code_fragments(lines_and_blocks: list[Line | Block]):
     parser = CodeFragmentParser(lines_and_blocks)
@@ -19,7 +15,6 @@ class CodeFragmentParser:
         self.lines_and_blocks = lines_and_blocks
         self.codeFragmentList = []
         self.targetLocator = None
-        self.targetLocator_regex = r'^(.+?)(?::([a-z]+))?\s*(?:#.*)?$'
 
     def parse(self):
         for obj in self.lines_and_blocks:
@@ -49,6 +44,7 @@ class CodeFragmentParser:
         if self.targetLocator != None:
             self._parse_with_undefined_block()
         self.targetLocator = parse_target_locator(line, self.targetLocator_regex)
+
 
     def _parse_with_undefined_block(self):
         self.codeFragmentList.append(CodeFragment(targetLocator=self.targetLocator, block=None))

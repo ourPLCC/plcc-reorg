@@ -1,12 +1,11 @@
 import re
-from ...parse_spec.parse_syntactic_spec import (
+
+from ...errors import InvalidLhsAltNameError, InvalidLhsNameError, ValidationError
+from ...structs import (
     SyntacticSpec,
 )
-from .errors import (
-    InvalidLhsNameError,
-    InvalidLhsAltNameError,
+from ...errors import (
     DuplicateLhsError,
-    ValidationError,
 )
 
 
