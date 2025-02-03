@@ -11,55 +11,72 @@ def parse_code_fragments(lines_and_blocks: list[Line | Block]):
     return parser.parse()
 
 class CodeFragmentParser:
-    def __init__(self, lines_and_blocks: list[Line | Block]):
-        self.lines_and_blocks = lines_and_blocks
+    def __init__(self, linesAndBlocks: list[Line | Block]):
+        self.linesAndBlocks = linesAndBlocks
         self.codeFragmentList = []
-        self.targetLocator = None
+        self.currentCodeFragment = CodeFragment(targetLocator=None, block=None)
 
     def parse(self):
-        for obj in self.lines_and_blocks:
-            self._parse_line_or_block(obj)
+        for obj in self.linesAndBlocks:
+            self._parseLineOrBlock(obj)
+            if self._isCurrentCodeFragmentAttributesDefined():
+                self._addCurrentCodeFragmentToList()
+                self._resetCurrentCodeFragment()
 
-        if self._is_target_locator_missing_associated_block():
-            self._add_code_fragment_with_undefined_block()
+        if self._isCurrentCodeFragmentTargetLocatorDefined() or self._isCurrentCodeFragmentBlockDefined():
+            self._addCurrentCodeFragmentToList()
 
         return self.codeFragmentList
 
-    def _parse_line_or_block(self, obj):
+    def _parseLineOrBlock(self, obj):
         handler = {
-                Line: self._parse_line,
-                Block: self._parse_block
+                Line: self._parseLine,
+                Block: self._parseBlock
             }.get(type(obj))
 
         handler(obj)
 
-    def _parse_block(self, block):
-        self._add_code_fragment(block)
-        self._reset_target_locator_attribute_to_none()
-
-    def _parse_line(self, line):
-        if self._is_comment_or_blank(line.string):
+    def _parseLine(self, line):
+        if self._isCommentOrBlank(line.string):
             return
+        if self._isCurrentCodeFragmentTargetLocatorDefined():
+            self._addCurrentCodeFragmentToList()
+            self._resetCurrentCodeFragment()
 
-        if self._is_target_locator_missing_associated_block():
-            self._add_code_fragment_with_undefined_block()
+        targetLocator = parse_target_locator(line)
+        self._setCurrentCodeFragmentTargetLocator(targetLocator)
 
-        self._set_target_locator_attribute_to_parsed_line(line)
+    def _parseBlock(self, block):
+        if not self._isCurrentCodeFragmentTargetLocatorDefined() and self._isCurrentCodeFragmentBlockDefined():
+            self._addCurrentCodeFragmentToList()
+            self._resetCurrentCodeFragment()
 
-    def _set_target_locator_attribute_to_parsed_line(self, line: Line):
-        self.targetLocator = parse_target_locator(line)
+        self.currentCodeFragment.block = block
 
-    def _reset_target_locator_attribute_to_none(self):
-        self.targetLocator = None
+        if not self._isCurrentCodeFragmentTargetLocatorDefined():
+            self._addCurrentCodeFragmentToList()
+            self._resetCurrentCodeFragment()
 
-    def _add_code_fragment(self, block):
-        self.codeFragmentList.append(CodeFragment(targetLocator=self.targetLocator, block=block))
-        
-    def _add_code_fragment_with_undefined_block(self):
-        self.codeFragmentList.append(CodeFragment(targetLocator=self.targetLocator, block=None))
+    def _setCurrentCodeFragmentTargetLocator(self, targetLocator):
+        self.currentCodeFragment.targetLocator = targetLocator
 
-    def _is_comment_or_blank(self, obj_str):
+    def _setCurrentCodeFragmentBlock(self, block):
+        self.currentCodeFragment.block = block
+
+    def _isCurrentCodeFragmentAttributesDefined(self):
+        return True if self._isCurrentCodeFragmentTargetLocatorDefined() and self._isCurrentCodeFragmentBlockDefined() else False
+
+    def _isCurrentCodeFragmentTargetLocatorDefined(self):
+        return True if self.currentCodeFragment.targetLocator != None else False
+
+    def _isCurrentCodeFragmentBlockDefined(self):
+        return True if self.currentCodeFragment.block != None else False
+
+    def _addCurrentCodeFragmentToList(self):
+        self.codeFragmentList.append(self.currentCodeFragment)
+
+    def _resetCurrentCodeFragment(self):
+        self.currentCodeFragment = CodeFragment(targetLocator=None, block=None)
+
+    def _isCommentOrBlank(self, obj_str):
         return True if re.match(r'\s*#', obj_str) or re.match(r'\s*$', obj_str) else False
-
-    def _is_target_locator_missing_associated_block(self):
-        return True if self.targetLocator != None else False

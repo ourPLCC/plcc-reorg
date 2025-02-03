@@ -44,6 +44,15 @@ def test_single_block_parses_undefined_target_locator():
         CodeFragment(None, lines_and_blocks[0])
     ]
 
+def test_mismatched_target_locator_and_block_make_two_code_fragments():
+    lines_and_blocks = [make_block(), make_line('Class:init')]
+    code_fragments = parse_code_fragments(lines_and_blocks)
+    assert code_fragments == [
+        CodeFragment(None, lines_and_blocks[0]),
+        CodeFragment(make_target_locator(lines_and_blocks[1], 'Class', 'init'), None)
+    ]
+
+
 def test_missing_blocks_are_defined_as_None():
     lines_and_blocks = [make_line('Class:init')]
     assert parse_code_fragments(lines_and_blocks) == [
