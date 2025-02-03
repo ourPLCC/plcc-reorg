@@ -1,6 +1,6 @@
 from pytest import raises, mark, fixture
 
-from ...errors import InvalidClassNameError
+from ...errors import InvalidClassNameError, UndefinedBlockError, UndefinedTargetLocatorError
 from .validate_semantic_spec import validate_semantic_spec
 from ...parse_spec.parse_semantic_spec import parse_semantic_spec
 from ...load_rough_spec.parse_lines import parse_lines

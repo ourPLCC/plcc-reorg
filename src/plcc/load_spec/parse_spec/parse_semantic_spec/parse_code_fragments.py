@@ -43,7 +43,7 @@ class CodeFragmentParser:
 
         if self.targetLocator != None:
             self._parse_with_undefined_block()
-        self.targetLocator = parse_target_locator(line, self.targetLocator_regex)
+        self.targetLocator = parse_target_locator(line)
 
 
     def _parse_with_undefined_block(self):

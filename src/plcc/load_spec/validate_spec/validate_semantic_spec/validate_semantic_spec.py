@@ -1,4 +1,4 @@
-from plcc.load_spec.errors import InvalidClassNameError
+from ...errors import InvalidClassNameError, UndefinedBlockError, UndefinedTargetLocatorError
 from ...structs import CodeFragment
 from ...load_rough_spec.parse_lines import parse_lines
 from ...structs import SemanticSpec
