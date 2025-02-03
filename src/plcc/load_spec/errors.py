@@ -58,7 +58,7 @@ class UndefinedBlockError(ValidationError):
 class UndefinedTargetLocatorError(ValidationError):
     def __init__(self, line):
         self.line = line
-        self.message = f"Undefined class name for the Block on line: {self.line.number}"
+        self.message = f"Undefined class name on line: {self.line.number}"
 
 @dataclass
 class InvalidLhsNameError(ValidationError):

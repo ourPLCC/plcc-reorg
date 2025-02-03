@@ -20,7 +20,7 @@ class CodeFragmentParser:
         for obj in self.lines_and_blocks:
             self._parse_line_or_block(obj)
 
-        if self.targetLocator != None:
+        if self._is_target_locator_missing_associated_block():
             self._parse_with_undefined_block()
 
         return self.codeFragmentList
@@ -34,21 +34,28 @@ class CodeFragmentParser:
         handler(obj)
 
     def _parse_block(self, block):
-        self.codeFragmentList.append(CodeFragment(targetLocator=self.targetLocator, block=block))
-        self.targetLocator = None
+        self._add_code_fragment(block)
+        self._reset_target_locator_attribute_to_none()
 
     def _parse_line(self, line):
-        if self._isCommentOrBlank(line.string):
-                return
+        if self._is_comment_or_blank(line.string):
+            return
 
         if self.targetLocator != None:
             self._parse_with_undefined_block()
         self.targetLocator = parse_target_locator(line)
 
+    def _add_code_fragment(self, block):
+        self.codeFragmentList.append(CodeFragment(targetLocator=self.targetLocator, block=block))
+
+    def _reset_target_locator_attribute_to_none(self):
+        self.targetLocator = None
 
     def _parse_with_undefined_block(self):
         self.codeFragmentList.append(CodeFragment(targetLocator=self.targetLocator, block=None))
 
-    def _isCommentOrBlank(self, obj_str):
+    def _is_comment_or_blank(self, obj_str):
         return True if re.match(r'\s*#', obj_str) or re.match(r'\s*$', obj_str) else False
 
+    def _is_target_locator_missing_associated_block(self):
+        return True if self.targetLocator != None else False
