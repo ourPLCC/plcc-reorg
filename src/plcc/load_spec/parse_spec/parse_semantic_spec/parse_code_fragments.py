@@ -21,7 +21,7 @@ class CodeFragmentParser:
             self._parse_line_or_block(obj)
 
         if self._is_target_locator_missing_associated_block():
-            self._parse_with_undefined_block()
+            self._add_code_fragment_with_undefined_block()
 
         return self.codeFragmentList
 
@@ -41,17 +41,21 @@ class CodeFragmentParser:
         if self._is_comment_or_blank(line.string):
             return
 
-        if self.targetLocator != None:
-            self._parse_with_undefined_block()
-        self.targetLocator = parse_target_locator(line)
+        if self._is_target_locator_missing_associated_block():
+            self._add_code_fragment_with_undefined_block()
 
-    def _add_code_fragment(self, block):
-        self.codeFragmentList.append(CodeFragment(targetLocator=self.targetLocator, block=block))
+        self._set_target_locator_attribute_to_parsed_line(line)
+
+    def _set_target_locator_attribute_to_parsed_line(self, line: Line):
+        self.targetLocator = parse_target_locator(line)
 
     def _reset_target_locator_attribute_to_none(self):
         self.targetLocator = None
 
-    def _parse_with_undefined_block(self):
+    def _add_code_fragment(self, block):
+        self.codeFragmentList.append(CodeFragment(targetLocator=self.targetLocator, block=block))
+        
+    def _add_code_fragment_with_undefined_block(self):
         self.codeFragmentList.append(CodeFragment(targetLocator=self.targetLocator, block=None))
 
     def _is_comment_or_blank(self, obj_str):
