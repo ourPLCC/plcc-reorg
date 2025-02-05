@@ -9,48 +9,48 @@ def parse_code_fragments(lines_and_blocks):
     return list(parse_fragments(locators_and_blocks))
 
 def parse_locators(lines_and_blocks):
-    for lob in lines_and_blocks:
-        if not isEmpty(lob):
-            yield parse_target_locator(lob) if isinstance(lob, Line) else lob
+    for locatorOrBlock in lines_and_blocks:
+        if not isEmpty(locatorOrBlock):
+            yield parse_target_locator(locatorOrBlock) if isinstance(locatorOrBlock, Line) else locatorOrBlock
 
-def parse_fragments(lobs):
-    lobs = list(lobs)
+def parse_fragments(locatorsOrBlocks):
+    locatorsOrBlocks = list(locatorsOrBlocks)
     i = 0
-    while i < len(lobs):
-        if isLocator(lobs, i) and isBlock(lobs, i+1):
-            yield CodeFragment(lobs[i], lobs[i+1])
+    while i < len(locatorsOrBlocks):
+        if isLocator(locatorsOrBlocks, i) and isBlock(locatorsOrBlocks, i+1):
+            yield CodeFragment(locatorsOrBlocks[i], locatorsOrBlocks[i+1])
             i += 2
-        elif isLocator(lobs, i) and isLocator(lobs, i+1):
-            yield CodeFragment(lobs[i], None)
+        elif isLocator(locatorsOrBlocks, i) and isLocator(locatorsOrBlocks, i+1):
+            yield CodeFragment(locatorsOrBlocks[i], None)
             i += 1
-        elif isBlock(lobs, i) and isBlock(lobs, i+1):
-            yield CodeFragment(None, lobs[i])
+        elif isBlock(locatorsOrBlocks, i) and isBlock(locatorsOrBlocks, i+1):
+            yield CodeFragment(None, locatorsOrBlocks[i])
             i += 1
-        elif isBlock(lobs, i) and isLocator(lobs, i+1):
-            yield CodeFragment(None, lobs[i])
+        elif isBlock(locatorsOrBlocks, i) and isLocator(locatorsOrBlocks, i+1):
+            yield CodeFragment(None, locatorsOrBlocks[i])
             i += 1
-        elif isLocator(lobs, i):
-            yield CodeFragment(lobs[i], None)
+        elif isLocator(locatorsOrBlocks, i):
+            yield CodeFragment(locatorsOrBlocks[i], None)
             i += 1
-        elif isBlock(lobs, i):
-            yield CodeFragment(None, lobs[i])
+        elif isBlock(locatorsOrBlocks, i):
+            yield CodeFragment(None, locatorsOrBlocks[i])
             i += 1
         else:
-            raise TypeError(f'{type(lobs[i])}')
+            raise TypeError(f'{type(locatorsOrBlocks[i])}')
 
-def isBlock(lobs, i):
-    return isType(lobs, i, Block)
+def isBlock(locatorsOrBlocks, i):
+    return isType(locatorsOrBlocks, i, Block)
 
-def isLocator(lobs, i):
-    return isType(lobs, i, TargetLocator)
+def isLocator(locatorsOrBlocks, i):
+    return isType(locatorsOrBlocks, i, TargetLocator)
 
-def isType(lobs, i, Type):
-    return i < len(lobs) and isinstance(lobs[i], Type)
+def isType(locatorsOrBlocks, i, Type):
+    return i < len(locatorsOrBlocks) and isinstance(locatorsOrBlocks[i], Type)
 
-def isEmpty(lob):
-    if lob is None:
+def isEmpty(locatorOrBlock):
+    if locatorOrBlock is None:
         return True
-    if isinstance(lob, Line):
-        s = lob.string
+    if isinstance(locatorOrBlock, Line):
+        s = locatorOrBlock.string
         return s is None or s.strip() == ''
     return False
