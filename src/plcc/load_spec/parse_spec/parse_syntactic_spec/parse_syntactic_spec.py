@@ -1,42 +1,55 @@
 from typing import List
-from plcc.load_spec.structs import CapturingSymbol, CapturingTerminal, Divider, LhsNonTerminal, RepeatingSyntacticRule, RhsNonTerminal, StandardSyntacticRule, Symbol, SyntacticRule, SyntacticSpec, Terminal
-from plcc.load_spec.structs import Line
 import re
 from re import Match
-from ...errors import (
+
+from plcc.load_spec.structs import (
+    CapturingSymbol,
+    CapturingTerminal,
+    LhsNonTerminal,
+    RepeatingSyntacticRule,
+    RhsNonTerminal,
+    StandardSyntacticRule,
+    Symbol, SyntacticRule,
+    SyntacticSpec,
+    Terminal,
+    Line
+)
+from plcc.load_spec.errors import (
     MalformedBNFError,
 )
 
 
-def parse_syntactic_spec(lines: List[Line | Divider] | None) -> SyntacticSpec:
-    return SyntacticParser(lines).parseSpec()
+def parse_syntactic_spec(dividerAndLines):
+    return SyntacticParser(dividerAndLines).parseSpec()
 
 
 class SyntacticParser:
-    def __init__(self, input: List[Line | Divider] | None):
-        self.spec = SyntacticSpec()
-        self.lines = input
+    def __init__(self, dividerAndLines):
+        self._spec = SyntacticSpec()
+        self._dividerAndLines = dividerAndLines
 
     def parseSpec(self) -> SyntacticSpec:
-        if not self.lines:
-            return self.spec
-        lines = self.lines
+        if not self._dividerAndLines:
+            return self._spec
+        lines = self._removeStartingDivider(self._dividerAndLines)
+        for line in lines:
+            self._parseLine(line)
+        return self._spec
+
+    def _removeStartingDivider(self, lines):
+        lines = self._dividerAndLines
         if not isinstance(lines[0], Line):
             lines = lines[1:]
-        for line in lines:
-            self.parseLine(line)
-        return self.spec
+        return lines
 
-    def parseLine(self, line):
+    def _parseLine(self, line):
         parser = SyntacticLineParser(line)
         if parser.isSyntacticRule():
             rule = parser.parseSyntacticRule()
-            self.spec.append(rule)
-
+            self._spec.append(rule)
 
 
 class SyntacticLineParser:
-
     def __init__(self, line: Line):
         self.line = line
         self.lhs = None
@@ -66,8 +79,8 @@ class SyntacticLineParser:
             return []
         return [
             self._parseSymbol(symbol)
-            for symbol in self.rhs.split()
-            if symbol and not symbol.startswith("#")
+                for symbol in self.rhs.split()
+                    if symbol and not symbol.startswith("#")
         ]
 
     def _parseSymbol(self, symbol: str) -> Symbol:
