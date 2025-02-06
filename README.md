@@ -1,3 +1,5 @@
+Development has moved to https://github.com/ourPLCC/plcc-ng
+
 # PLCC - Programming Language Compiler Compiler
 
 PLCC is designed for teaching and learning programming language concepts.
